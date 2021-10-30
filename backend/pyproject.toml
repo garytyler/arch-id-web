@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "arch-recognizer-web-backend"
+version = "0.1.0"
+description = ""
+authors = ["Gary Tyler <mail@garytyler.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "^0.70.0"
+uvicorn = { extras = ["standard"], version = "^0.15.0" }
+
+[tool.poetry.dev-dependencies]
+black = "^21.9b0"
+isort = "^5.9.3"
+flake8 = "^4.0.1"
+mypy = "^0.910"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

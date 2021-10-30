@@ -1,0 +1,19 @@
+{
+    "name": "arch-recognizer-backend",
+    "dockerComposeFile": [
+        "../docker-compose.yml",
+        "../docker-compose.override.yml"
+    ],
+    "service": "backend",
+    "workspaceFolder": "/srv/backend",
+    "settings": {
+        "terminal.integrated.profiles.linux": {
+            "bash": {
+                "path": "/bin/bash",
+                "args": [
+                    "--login"
+                ]
+            }
+        }
+    }
+}

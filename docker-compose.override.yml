@@ -1,0 +1,41 @@
+x-shared-environment: &shared-environment
+# postgres
+  POSTGRES_HOST: postgres
+  POSTGRES_DB: postgres
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: notsecret
+# redis
+  DOMAIN: localhost
+
+services:
+  backend:
+    environment:
+      <<: *shared-environment
+      DEBUG: 1
+      SECRET_KEY: notsecret
+      ALLOWED_HOSTS: '["*"]'
+      BACKEND_CORS_ORIGINS: '["*"]'
+    links:
+      - postgres
+    build:
+      target: dev-stage
+    command: ${DEV_BACKEND_CMD:-["python", "-m", "uvicorn app.main:app --reload"]}
+    ports:
+      - 8001 # For e2e testing
+    volumes:
+      - .:/srv/:rw
+
+  postgres:
+    environment:
+      <<: *shared-environment
+      POSTGRES_INITDB_ARGS: "--data-checksums"
+    command: ["postgres", "-c", "log_statement=all"]
+
+  pgadmin:
+    environment:
+      <<: *shared-environment
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: notsecret
+
+volumes:
+  node_modules:
