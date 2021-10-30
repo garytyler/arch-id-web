@@ -1,0 +1,23 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      # target: production
+    ports:
+      - 3000:3000
+    volumes:
+      - ./frontend:/srv/frontend
+      - node_modules_data:/srv/frontend/node_modules
+
+  predict:
+    image: tensorflow/serving:latest-gpu
+    ports:
+      - 8501:8501
+    environment:
+      - MODEL_NAME=InceptionResNetV2
+    volumes:
+      - ./models:/models
+
+
+volumes:
+  node_modules_data:
