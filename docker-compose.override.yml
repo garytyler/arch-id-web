@@ -1,10 +1,9 @@
-x-shared-environment: &shared-environment
-# postgres
+x-shared-environment: &shared-environment # postgres
   POSTGRES_HOST: postgres
   POSTGRES_DB: postgres
   POSTGRES_USER: postgres
   POSTGRES_PASSWORD: notsecret
-# redis
+  # redis
   DOMAIN: localhost
 
 services:
@@ -19,11 +18,11 @@ services:
       - postgres
     build:
       target: dev-stage
-    command: ${DEV_BACKEND_CMD:-["python", "-m", "uvicorn app.main:app --reload"]}
+    command: /bin/bash -c "python -m uvicorn app.main:app --reload"
     ports:
       - 8001 # For e2e testing
     volumes:
-      - .:/srv/:rw
+      - .:/srv
 
   postgres:
     environment:

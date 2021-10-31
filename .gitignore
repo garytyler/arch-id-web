@@ -1,14 +1,8 @@
 *
 !.git
+!/frontend/
+!/backend/
+!/models/
 !.gitignore
-!/README.md
 !/docker-compose.yml
 !/docker-compose.override.yml
-!/backend/
-!/backend/app/
-!/backend/app/**/
-!/backend/app/**/*.py
-!/backend/.devcontainer.json
-!/backend/Dockerfile
-!/backend/pyproject.toml
-!/backend/poetry.lock

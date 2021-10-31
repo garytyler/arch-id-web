@@ -23,12 +23,41 @@ services:
     build:
       context: ./backend
       target: prod-stage
-    command: [ "gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-c", "./gunicorn_conf.py", "app.main:app" ]
+    command:
+      [
+        "gunicorn",
+        "-k",
+        "uvicorn.workers.UvicornWorker",
+        "-c",
+        "./gunicorn_conf.py",
+        "app.main:app",
+      ]
+    links:
+      - predict
     ports:
       - 8000:8000
     depends_on:
-      # - frontend
       - postgres
+    volumes:
+      - ./backend:/srv/backend
+
+  # train:
+  # ports:
+  #   - 6006:6006
+  # volumes:
+  #   - .:/srv:rw"
+  #   - ${DATASET_DIR:-./dataset}:/dataset:ro
+  #   - ${OUTPUT_DIR:-./output}:/output
+
+  predict:
+    image: tensorflow/serving:latest-gpu
+    container_name: predict
+    ports:
+      - 8501:8501
+    environment:
+      - MODEL_NAME=InceptionResNetV2
+    volumes:
+      - ./models:/models
 
   postgres:
     image: postgres:13.1-alpine

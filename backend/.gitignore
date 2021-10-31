@@ -1,0 +1,13 @@
+*
+!/app/
+!/app/**/
+!/app/**/*.py
+!/tests/
+!/tests/**/
+!/tests/**/*.py
+!/tests/assets/*.jpg
+!/.devcontainer.json
+!/.gitignore
+!/Dockerfile
+!/pyproject.toml
+!/poetry.lock
