@@ -1,7 +1,10 @@
 services:
   frontend:
     build:
-      context: ./frontend
       target: development
     volumes:
       - .:/srv
+      - node_modules_data:/srv/frontend/node_modules
+
+volumes:
+  node_modules_data:
