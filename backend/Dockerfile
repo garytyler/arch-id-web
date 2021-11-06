@@ -14,10 +14,9 @@ WORKDIR $WORKDIR
 
 ENV PATH="/root/.local/bin:${PATH}"
 
-RUN command python
+RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python3 -
 
-RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python3 - &&
-    poetry config --no-interaction virtualenvs.create false
+RUN poetry config --no-interaction virtualenvs.create false
 
 FROM base-stage AS prod-stage
 

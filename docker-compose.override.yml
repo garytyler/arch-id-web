@@ -14,8 +14,8 @@ services:
       SECRET_KEY: notsecret
       ALLOWED_HOSTS: '["*"]'
       BACKEND_CORS_ORIGINS: '["*"]'
-    links:
-      - postgres
+    # links:
+    #   - postgres
     build:
       target: dev-stage
     command: /bin/bash -c "python -m uvicorn app.main:app --reload"
@@ -31,17 +31,17 @@ services:
       - .:/srv
       - node_modules_data:/srv/frontend/node_modules
 
-  postgres:
-    environment:
-      <<: *shared-environment
-      POSTGRES_INITDB_ARGS: "--data-checksums"
-    command: ["postgres", "-c", "log_statement=all"]
+  # postgres:
+  #   environment:
+  #     <<: *shared-environment
+  #     POSTGRES_INITDB_ARGS: "--data-checksums"
+  #   command: ["postgres", "-c", "log_statement=all"]
 
-  pgadmin:
-    environment:
-      <<: *shared-environment
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: notsecret
+  # pgadmin:
+  #   environment:
+  #     <<: *shared-environment
+  #     PGADMIN_DEFAULT_EMAIL: admin@example.com
+  #     PGADMIN_DEFAULT_PASSWORD: notsecret
 
 volumes:
   node_modules_data:

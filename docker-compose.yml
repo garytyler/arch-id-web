@@ -36,8 +36,8 @@ services:
       - predict
     ports:
       - 8000:8000
-    depends_on:
-      - postgres
+    # depends_on:
+    #   - postgres
     volumes:
       - ./backend:/srv/backend
 
@@ -65,25 +65,25 @@ services:
     volumes:
       - ./models:/models
 
-  postgres:
-    image: postgres:13.1-alpine
-    container_name: postgres
-    environment:
-      <<: *shared-environment
-      PGDATA: /var/lib/postgresql/data/pgdata
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+  # postgres:
+  #   image: postgres:13.1-alpine
+  #   container_name: postgres
+  #   environment:
+  #     <<: *shared-environment
+  #     PGDATA: /var/lib/postgresql/data/pgdata
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
 
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin
-    environment:
-      <<: *shared-environment
-      PGADMIN_LISTEN_PORT: 5050
-      PGADMIN_DEFAULT_EMAIL:
-      PGADMIN_DEFAULT_PASSWORD:
-    depends_on:
-      - postgres
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   container_name: pgadmin
+  #   environment:
+  #     <<: *shared-environment
+  #     PGADMIN_LISTEN_PORT: 5050
+  #     PGADMIN_DEFAULT_EMAIL:
+  #     PGADMIN_DEFAULT_PASSWORD:
+  #   depends_on:
+  #     - postgres
 
 volumes:
   postgres_data: null
