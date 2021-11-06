@@ -24,6 +24,13 @@ services:
     volumes:
       - .:/srv
 
+  frontend:
+    build:
+      target: development
+    volumes:
+      - .:/srv
+      - node_modules_data:/srv/frontend/node_modules
+
   postgres:
     environment:
       <<: *shared-environment
@@ -37,4 +44,4 @@ services:
       PGADMIN_DEFAULT_PASSWORD: notsecret
 
 volumes:
-  node_modules:
+  node_modules_data:

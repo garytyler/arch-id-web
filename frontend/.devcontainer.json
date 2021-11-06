@@ -1,0 +1,19 @@
+{
+    "name": "frontend",
+    "dockerComposeFile": [
+        "../docker-compose.yml",
+        "../docker-compose.override.yml"
+    ],
+    "service": "frontend",
+    "workspaceFolder": "/srv/frontend",
+    "settings": {
+        "terminal.integrated.profiles.linux": {
+            "bash": {
+                "path": "/bin/bash",
+                "args": [
+                    "--login"
+                ]
+            }
+        }
+    }
+}

@@ -1,0 +1,15 @@
+*
+!/public/
+!/public/**
+!/src
+!/src/**
+!/src/**/*.ts
+!/src/**/*.tsx
+!/src/**/*.css
+!/src/**/*.svg
+!/.devcontainer.json
+!/.dockerignore
+!/Dockerfile
+!/package.json
+!/tsconfig.json
+!/yarn.lock

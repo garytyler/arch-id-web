@@ -49,13 +49,19 @@ services:
   #   - ${DATASET_DIR:-./dataset}:/dataset:ro
   #   - ${OUTPUT_DIR:-./output}:/output
 
+  frontend:
+    build:
+      context: ./frontend
+      target: production
+    ports:
+      - 3000:3000
+
   predict:
     image: tensorflow/serving:latest-gpu
-    container_name: predict
     ports:
       - 8501:8501
     environment:
-      - MODEL_NAME=InceptionResNetV2
+      - MODEL_BASE_PATH=/models
     volumes:
       - ./models:/models
 
