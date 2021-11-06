@@ -1,11 +1,9 @@
 import { ChangeEvent, useState } from "react";
 import "./App.css";
+// import imageToArray from "./imageConversion";
 
 function Main() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
-  const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d");
 
   const changeHandler = (event: ChangeEvent<HTMLInputElement> | null) => {
     if (event?.target?.files) {
@@ -14,13 +12,8 @@ function Main() {
       const image = new Image(299, 299);
       image.src = URL.createObjectURL(event.target.files[0]);
       image.onload = () => {
-        if (context) {
-          context.drawImage(image, 0, 0);
-          const imageData = context.getImageData(0, 0, 299, 299);
-          // document.getElementById("placehere")?.appendChild(image);
-          document.body.appendChild(image);
-          console.log(imageData);
-        }
+        document.body.appendChild(image);
+        // const imageArray = imageToArray(image, 299, 299);
       };
     }
   };
