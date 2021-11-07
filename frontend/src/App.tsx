@@ -1,6 +1,6 @@
 import { ChangeEvent, useState } from "react";
 import "./App.css";
-// import imageToArray from "./imageConversion";
+import imageToArray from "./imageConversion";
 
 function Main() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -8,12 +8,14 @@ function Main() {
   const changeHandler = (event: ChangeEvent<HTMLInputElement> | null) => {
     if (event?.target?.files) {
       setSelectedFile(event.target.files[0]);
-
-      const image = new Image(299, 299);
+      const image = new Image();
       image.src = URL.createObjectURL(event.target.files[0]);
       image.onload = () => {
         document.body.appendChild(image);
-        // const imageArray = imageToArray(image, 299, 299);
+        let imageArray = imageToArray(image, 299, 299);
+        if (imageArray !== null) {
+          let expImageArray = [imageArray];
+        }
       };
     }
   };

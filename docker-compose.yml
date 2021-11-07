@@ -33,7 +33,7 @@ services:
         "app.main:app",
       ]
     links:
-      - predict
+      - models
     ports:
       - 8000:8000
     # depends_on:
@@ -50,18 +50,21 @@ services:
   #   - ${OUTPUT_DIR:-./output}:/output
 
   frontend:
+    container_name: frontend
     build:
       context: ./frontend
       target: production
     ports:
       - 3000:3000
 
-  predict:
+  models:
+    container_name: models
     image: tensorflow/serving:latest-gpu
     ports:
       - 8501:8501
     environment:
       - MODEL_BASE_PATH=/models
+      - MODEL_NAME=InceptionResNet
     volumes:
       - ./models:/models
 
