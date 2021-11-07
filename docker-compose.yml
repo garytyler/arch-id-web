@@ -54,8 +54,13 @@ services:
     build:
       context: ./frontend
       target: production
+    # links:
+    #   - models
     ports:
       - 3000:3000
+    # networks:
+    #   - frontend
+    #   - models
 
   models:
     container_name: models
@@ -67,6 +72,8 @@ services:
       - MODEL_NAME=InceptionResNet
     volumes:
       - ./models:/models
+    # networks:
+    #   - models
 
   # postgres:
   #   image: postgres:13.1-alpine
@@ -87,6 +94,10 @@ services:
   #     PGADMIN_DEFAULT_PASSWORD:
   #   depends_on:
   #     - postgres
+
+# networks:
+#   frontend:
+#   models:
 
 volumes:
   postgres_data: null

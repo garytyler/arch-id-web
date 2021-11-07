@@ -10,7 +10,6 @@ IMG_WIDTH = 299
 
 def test_predict():
     tf.config.run_functions_eagerly(False)
-    # tf.config.enable_eager_execution(True)
     path = Path(__file__).parent / "assets" / "sample.jpg"
     img = tf.keras.preprocessing.image.load_img(
         path, target_size=(299, 299), interpolation="nearest"
@@ -30,3 +29,9 @@ def test_predict():
         ),
         content=img_array,
     )
+    print(r.json())
+    n = 0
+    for i in r.json()["predictions"][0]:
+        if round(i, 2) == 1.0:
+            print(n)
+        n += 1
