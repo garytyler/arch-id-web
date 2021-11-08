@@ -7,29 +7,29 @@ x-shared-environment: &shared-environment # postgres
   DOMAIN: localhost
 
 services:
-  backend:
-    environment:
-      <<: *shared-environment
-      DEBUG: 1
-      SECRET_KEY: notsecret
-      ALLOWED_HOSTS: '["*"]'
-      BACKEND_CORS_ORIGINS: '["*"]'
-    # links:
-    #   - postgres
-    build:
-      target: dev-stage
-    command: /bin/bash -c "python -m uvicorn app.main:app --reload"
-    ports:
-      - 8001 # For e2e testing
-    volumes:
-      - .:/srv
-
   frontend:
     build:
       target: development
     volumes:
       - .:/srv
       - node_modules_data:/srv/frontend/node_modules
+
+  # backend:
+  #   environment:
+  #     <<: *shared-environment
+  #     DEBUG: 1
+  #     SECRET_KEY: notsecret
+  #     ALLOWED_HOSTS: '["*"]'
+  #     BACKEND_CORS_ORIGINS: '["*"]'
+  #   # links:
+  #   #   - postgres
+  #   build:
+  #     target: dev-stage
+  #   command: /bin/bash -c "python -m uvicorn app.main:app --reload"
+  #   ports:
+  #     - 8001 # For e2e testing
+  #   volumes:
+  #     - .:/srv
 
   # postgres:
   #   environment:

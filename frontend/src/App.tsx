@@ -1,8 +1,9 @@
 import { ChangeEvent, useState } from "react";
 import "./App.css";
 import imageToArray from "./image-conversion";
+import { argmax, softmax, titleCase } from "./utils";
 
-const STYLE_KEY: string[] = [
+const CLASS_NAMES: string[] = [
   "Achaemenid",
   "American Foursquare",
   "American craftsman style",
@@ -34,19 +35,24 @@ interface IPredictResponse {
   predictions: Array<Array<number>>;
 }
 
-interface IResult {
+interface IResultDisplay {
   style: string;
   src: string;
 }
 
+interface IStyleScore {
+  style: string;
+  weight: number;
+  score: number;
+}
+
 function Main() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [result, setResult] = useState<IResult | null>(null);
+  const [result, setResult] = useState<IResultDisplay | null>(null);
 
   const changeHandler = (event: ChangeEvent<HTMLInputElement> | null) => {
     if (event?.target?.files) {
       setSelectedFile(event.target.files[0]);
-
       const image = new Image();
       image.src = URL.createObjectURL(event.target.files[0]);
       image.onload = () => {
@@ -54,26 +60,45 @@ function Main() {
         if (imageArray === null) return;
         let expImageArray = [imageArray];
 
-        fetch("http://localhost:8501/v1/models/InceptionResNet:predict", {
-          method: "POST",
-          headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            signature_name: "serving_default",
-            instances: expImageArray,
-          }),
-        })
+        fetch(
+          "http://localhost:8501/v1/models/InceptionResNetV2-imagenet:predict",
+          {
+            method: "POST",
+            headers: {
+              "Accept": "application/json",
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              signature_name: "serving_default",
+              instances: expImageArray,
+            }),
+          }
+        )
           .then((res) => res.json())
           .then((res: IPredictResponse) => {
-            for (let n in res["predictions"][0]) {
-              if (res["predictions"][0][n] === 1.0) {
-                console.log(STYLE_KEY[n]);
-                setResult({ style: STYLE_KEY[n], src: image.src });
-                return;
-              }
+            const weights = res["predictions"][0];
+            const scores = softmax(res["predictions"][0]);
+            const results = [];
+            for (let i = 0; i < weights.length; i++) {
+              const styleScore: IStyleScore = {
+                style: titleCase(CLASS_NAMES[i]),
+                weight: weights[i],
+                score: scores[i],
+              };
+              results.push(styleScore);
             }
+            for (let i = 0; i < results.length; i++) {
+              console.log(
+                i,
+                results[i].style,
+                results[i].score,
+                results[i].weight.toFixed(5)
+              );
+            }
+            setResult({
+              style: titleCase(CLASS_NAMES[argmax(weights)]),
+              src: image.src,
+            });
           })
           .catch((err) => console.error(err));
       };
@@ -92,6 +117,7 @@ function Main() {
         <br />
         <h3>File Details:</h3>
         <pre>File Name: {selectedFile.name}</pre>
+        <pre>File Path: {selectedFile.webkitRelativePath}</pre>
         <pre>File Type: {selectedFile.type}</pre>
         <pre>File Size: {selectedFile.size}</pre>
         <h2>Result:</h2>

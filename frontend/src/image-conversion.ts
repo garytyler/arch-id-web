@@ -1,12 +1,13 @@
 export default function imageToArray(
   image: HTMLImageElement,
   width: number,
-  height: number
+  height: number,
+  imageSmoothing: boolean = false
 ): number[][][] | null {
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
   if (!context) return null;
-  context.imageSmoothingEnabled = false;
+  context.imageSmoothingEnabled = imageSmoothing;
   context.drawImage(image, 0, 0, width, height);
   const imageData: ImageData = context.getImageData(0, 0, width, height);
   const step = 4;

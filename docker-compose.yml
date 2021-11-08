@@ -4,42 +4,28 @@ x-shared-environment:
   APP_DESC: &app-description ""
   # dns
   DOMAIN:
-  # postgres
-  POSTGRES_HOST:
-  POSTGRES_DB:
-  POSTGRES_USER:
-  POSTGRES_PASSWORD:
 
 services:
-  backend:
-    container_name: backend
-    environment:
-      <<: *shared-environment
-      POETRY_VERSION: 1.1.11
-      DEBUG: 0
-      SECRET_KEY:
-      ALLOWED_HOSTS:
-      BACKEND_CORS_ORIGINS:
+  frontend:
+    container_name: frontend
     build:
-      context: ./backend
-      target: prod-stage
-    command:
-      [
-        "gunicorn",
-        "-k",
-        "uvicorn.workers.UvicornWorker",
-        "-c",
-        "./gunicorn_conf.py",
-        "app.main:app",
-      ]
+      context: ./frontend
+      target: production
     links:
       - models
     ports:
-      - 8000:8000
-    # depends_on:
-    #   - postgres
+      - 3000:3000
+
+  models:
+    container_name: models
+    image: tensorflow/serving:latest-gpu
+    ports:
+      - 8501:8501
+    environment:
+      - MODEL_BASE_PATH=/models
+      - MODEL_NAME=InceptionResNetV2-imagenet
     volumes:
-      - ./backend:/srv/backend
+      - ./models:/models
 
   # train:
   # ports:
@@ -49,31 +35,35 @@ services:
   #   - ${DATASET_DIR:-./dataset}:/dataset:ro
   #   - ${OUTPUT_DIR:-./output}:/output
 
-  frontend:
-    container_name: frontend
-    build:
-      context: ./frontend
-      target: production
-    # links:
-    #   - models
-    ports:
-      - 3000:3000
-    # networks:
-    #   - frontend
-    #   - models
-
-  models:
-    container_name: models
-    image: tensorflow/serving:latest-gpu
-    ports:
-      - 8501:8501
-    environment:
-      - MODEL_BASE_PATH=/models
-      - MODEL_NAME=InceptionResNet
-    volumes:
-      - ./models:/models
-    # networks:
-    #   - models
+  # backend:
+  #   container_name: backend
+  #   environment:
+  #     <<: *shared-environment
+  #     POETRY_VERSION: 1.1.11
+  #     DEBUG: 0
+  #     SECRET_KEY:
+  #     ALLOWED_HOSTS:
+  #     BACKEND_CORS_ORIGINS:
+  #   build:
+  #     context: ./backend
+  #     target: prod-stage
+  #   command:
+  #     [
+  #       "gunicorn",
+  #       "-k",
+  #       "uvicorn.workers.UvicornWorker",
+  #       "-c",
+  #       "./gunicorn_conf.py",
+  #       "app.main:app",
+  #     ]
+  #   # links:
+  #   #   - models
+  #   ports:
+  #     - 8000:8000
+  #   # depends_on:
+  #   #   - postgres
+  #   volumes:
+  #     - ./backend:/srv/backend
 
   # postgres:
   #   image: postgres:13.1-alpine
@@ -94,10 +84,6 @@ services:
   #     PGADMIN_DEFAULT_PASSWORD:
   #   depends_on:
   #     - postgres
-
-# networks:
-#   frontend:
-#   models:
 
 volumes:
   postgres_data: null
