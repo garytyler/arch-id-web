@@ -1,89 +1,76 @@
-x-shared-environment:
-  &shared-environment # Pass to build environments and containers for all services
-  APP_NAME: &app-name "Architecture Recognizer"
-  APP_DESC: &app-description ""
-  # dns
-  DOMAIN:
-
 services:
   frontend:
     container_name: frontend
     build:
       context: ./frontend
       target: production
-    links:
-      - models
+    #    links:
+    #      - models
     ports:
       - 3000:3000
 
+  backend:
+    container_name: backend
+    environment:
+      POETRY_VERSION: 1.1.11
+    build:
+      context: ./backend
+      target: production
+    command:
+      [
+        "gunicorn",
+        "-k",
+        "uvicorn.workers.UvicornWorker",
+        "-c",
+        "./gunicorn_conf.py",
+        "app.main:app",
+      ]
+    ports:
+      - 8000:8000
+    links:
+      - models
+    volumes:
+      - ./backend:/srv/backend
+
   models:
     container_name: models
-    image: tensorflow/serving:latest-gpu
+    image: tensorflow/serving:latest
     ports:
+      - 8500:8500
       - 8501:8501
+    command:
+      - --model_config_file=/config/models.prod.config
+      - --model_config_file_poll_wait_seconds=300
+      - --rest_api_timeout_in_ms=30000
+      # - --enable_batching=true
+      # - --batching_parameters_file=/config/batching_parameters.txt
+      # - --monitoring_config_file=/config/monitoring_config.txt
     environment:
-      - MODEL_BASE_PATH=/models
-      - MODEL_NAME=InceptionResNetV2-imagenet
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - S3_ENDPOINT=${S3_ENDPOINT}
     volumes:
-      - ./models:/models
+      - ./config:/config
+
+  # models:
+  #   container_name: models
+  #   image: tensorflow/serving:latest-gpu
+  #   ports:
+  #     - 8501:8501
+  #   environment:
+  #     - MODEL_BASE_PATH=/models
+  #     - MODEL_NAME=InceptionResNetV2-imagenet
+  #   volumes:
+  #     - ./models:/models
 
   # train:
-  # ports:
-  #   - 6006:6006
-  # volumes:
-  #   - .:/srv:rw"
-  #   - ${DATASET_DIR:-./dataset}:/dataset:ro
-  #   - ${OUTPUT_DIR:-./output}:/output
-
-  # backend:
-  #   container_name: backend
-  #   environment:
-  #     <<: *shared-environment
-  #     POETRY_VERSION: 1.1.11
-  #     DEBUG: 0
-  #     SECRET_KEY:
-  #     ALLOWED_HOSTS:
-  #     BACKEND_CORS_ORIGINS:
-  #   build:
-  #     context: ./backend
-  #     target: prod-stage
-  #   command:
-  #     [
-  #       "gunicorn",
-  #       "-k",
-  #       "uvicorn.workers.UvicornWorker",
-  #       "-c",
-  #       "./gunicorn_conf.py",
-  #       "app.main:app",
-  #     ]
-  #   # links:
-  #   #   - models
   #   ports:
-  #     - 8000:8000
-  #   # depends_on:
-  #   #   - postgres
+  #     - 6006:6006
   #   volumes:
-  #     - ./backend:/srv/backend
-
-  # postgres:
-  #   image: postgres:13.1-alpine
-  #   container_name: postgres
-  #   environment:
-  #     <<: *shared-environment
-  #     PGDATA: /var/lib/postgresql/data/pgdata
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
-
-  # pgadmin:
-  #   image: dpage/pgadmin4
-  #   container_name: pgadmin
-  #   environment:
-  #     <<: *shared-environment
-  #     PGADMIN_LISTEN_PORT: 5050
-  #     PGADMIN_DEFAULT_EMAIL:
-  #     PGADMIN_DEFAULT_PASSWORD:
-  #   depends_on:
-  #     - postgres
+  #     - .:/srv:rw"
+  #     - ${DATASET_DIR:-./dataset}:/dataset:ro
+  #     - ${OUTPUT_DIR:-./output}:/output
 
 volumes:
   postgres_data: null
