@@ -2,7 +2,6 @@
 !.git
 !/frontend/
 !/backend/
-!/models/
 !.gitignore
 !/docker-compose.yml
 !/docker-compose.override.yml

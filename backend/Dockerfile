@@ -1,6 +1,6 @@
 FROM python:3.9-buster AS python
 
-FROM python AS base-stage
+FROM python AS base
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -18,10 +18,10 @@ RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/inst
 
 RUN poetry config --no-interaction virtualenvs.create false
 
-FROM base-stage AS prod-stage
+FROM base AS production
 
 RUN poetry install --no-interaction --no-root --no-dev
 
-FROM prod-stage AS dev-stage
+FROM production AS development
 
 RUN poetry install --no-interaction --no-root

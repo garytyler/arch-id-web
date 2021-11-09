@@ -1,11 +1,3 @@
-x-shared-environment: &shared-environment # postgres
-  POSTGRES_HOST: postgres
-  POSTGRES_DB: postgres
-  POSTGRES_USER: postgres
-  POSTGRES_PASSWORD: notsecret
-  # redis
-  DOMAIN: localhost
-
 services:
   frontend:
     build:
@@ -14,34 +6,20 @@ services:
       - .:/srv
       - node_modules_data:/srv/frontend/node_modules
 
-  # backend:
-  #   environment:
-  #     <<: *shared-environment
-  #     DEBUG: 1
-  #     SECRET_KEY: notsecret
-  #     ALLOWED_HOSTS: '["*"]'
-  #     BACKEND_CORS_ORIGINS: '["*"]'
-  #   # links:
-  #   #   - postgres
-  #   build:
-  #     target: dev-stage
-  #   command: /bin/bash -c "python -m uvicorn app.main:app --reload"
-  #   ports:
-  #     - 8001 # For e2e testing
-  #   volumes:
-  #     - .:/srv
+  backend:
+    build:
+      target: development
+    command: /bin/bash -c "python -m uvicorn app.main:app --host=0.0.0.0 --port=8000 --reload"
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/srv
 
-  # postgres:
-  #   environment:
-  #     <<: *shared-environment
-  #     POSTGRES_INITDB_ARGS: "--data-checksums"
-  #   command: ["postgres", "-c", "log_statement=all"]
-
-  # pgadmin:
-  #   environment:
-  #     <<: *shared-environment
-  #     PGADMIN_DEFAULT_EMAIL: admin@example.com
-  #     PGADMIN_DEFAULT_PASSWORD: notsecret
+  models:
+    command:
+      - --model_config_file=/config/models.dev.config
+    volumes:
+      - ./models:/models
 
 volumes:
   node_modules_data:
