@@ -2,19 +2,19 @@ import { Box, Button, Container } from "@mui/material";
 import axios from "axios";
 import * as React from "react";
 import { ChangeEvent, useState } from "react";
+import AutoSizer from "react-virtualized-auto-sizer";
 import {
-  FlexibleXYPlot,
   HorizontalGridLines,
   VerticalBarSeries,
   VerticalBarSeriesPoint,
   VerticalGridLines,
   XAxis,
+  XYPlot,
   YAxis,
 } from "react-vis";
 import "./App.css";
 import "./index.css";
 import { CLASS_NAMES } from "./settings";
-
 interface IPredictResponse {
   predictions: number[];
   probabilities: number[];
@@ -74,7 +74,6 @@ function Main() {
   };
 
   if (selectedFile && chartData.length > 0) {
-    console.log(chartData);
     return (
       <Container>
         <Box>
@@ -89,33 +88,32 @@ function Main() {
             <pre>File Size: {selectedFile.size}</pre>
             <h2>Result:</h2>
 
-            <Box sx={{ flexWrap: "wrap" }}>
-              <FlexibleXYPlot
-                margin={{ bottom: 70 }}
-                xType="ordinal"
-                width={900}
-                height={300}
-              >
-                <VerticalGridLines />
-                <HorizontalGridLines />
-                <XAxis tickLabelAngle={-45} />
-                <YAxis />
-                <VerticalBarSeries
-                  barWidth={0.9}
-                  data={chartData}
-                  // data={[
-                  //   { x: "Apples", y: 12 },
-                  //   { x: "Bananas", y: 2 },
-                  //   { x: "Cranberries", y: 11 },
-                  // ]}
-                />
-              </FlexibleXYPlot>
-            </Box>
-            <img
-              src={URL.createObjectURL(selectedFile)}
-              alt="Source"
-              id="placeholder"
-            ></img>
+            <AutoSizer>
+              {({ height, width }) => (
+                <div>
+                  <Box>
+                    <img
+                      src={URL.createObjectURL(selectedFile)}
+                      alt="Source"
+                      id="placeholder"
+                      width={width}
+                    />
+                  </Box>
+                  <XYPlot
+                    margin={{ bottom: 150, left: 100, right: 50 }}
+                    xType="ordinal"
+                    width={width}
+                    height={height}
+                  >
+                    <VerticalGridLines />
+                    <HorizontalGridLines />
+                    <XAxis tickLabelAngle={-45} />
+                    <YAxis />
+                    <VerticalBarSeries barWidth={0.9} data={chartData} />
+                  </XYPlot>
+                </div>
+              )}
+            </AutoSizer>
           </div>
         </Box>
       </Container>
