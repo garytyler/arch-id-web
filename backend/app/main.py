@@ -3,9 +3,8 @@ from io import BytesIO
 from typing import List, Tuple
 
 import httpx
-import numpy as np
 import tensorflow as tf
-from fastapi import APIRouter, Depends, FastAPI, File, UploadFile
+from fastapi import APIRouter, Depends, FastAPI, File
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 
@@ -21,7 +20,7 @@ async def hello():
 
 
 @api_router.post("/predict/{model_name}")
-async def upload_file(
+async def predict(
     model_name: str,
     base_cnn: BaseCNN = Depends(base_cnn),
     files: List[bytes] = File(...),
@@ -43,16 +42,17 @@ async def upload_file(
         )
     predictions = response.json()["predictions"][0]
     probabilities = tf.nn.softmax(predictions).numpy().tolist()
-    return {
-        "predictions": {
-            CLASS_NAMES[index]: prediction
-            for index, prediction in enumerate(predictions)
-        },
-        "probabilities": {
-            CLASS_NAMES[index]: probability
-            for index, probability in enumerate(probabilities)
-        },
-    }
+    return {"predictions": predictions, "probabilities": probabilities}
+    # return {
+    #     "predictions": {
+    #         CLASS_NAMES[index]: prediction
+    #         for index, prediction in enumerate(predictions)
+    #     },
+    #     "probabilities": {
+    #         CLASS_NAMES[index]: probability
+    #         for index, probability in enumerate(probabilities)
+    #     },
+    # }
 
 
 def get_app():
