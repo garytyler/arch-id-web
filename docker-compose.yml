@@ -4,8 +4,9 @@ services:
     build:
       context: ./frontend
       target: production
-    #    links:
-    #      - models
+    environment: 
+      - "REACT_APP_TITLE=Architecture Recognizer"
+      - "REACT_APP_DOMAIN=architecture-recognizer.com"
     ports:
       - 3000:3000
 

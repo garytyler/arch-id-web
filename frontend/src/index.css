@@ -11,3 +11,16 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+
+/* Customizations below this line */
+
+/* Theme the full height of the window. */
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+#wrapper {
+  min-height: 100%;
+}
