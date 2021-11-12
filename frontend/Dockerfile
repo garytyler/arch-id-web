@@ -2,7 +2,7 @@ FROM node:16 AS base
 
 WORKDIR /srv/frontend
 
-COPY package*.json yarn.lock ./
+COPY package*.json ./
 
 FROM base AS development
 
