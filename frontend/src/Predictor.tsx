@@ -194,7 +194,6 @@ export default function Predictor() {
     return (
       <div>
         <Box>{input()}</Box>
-        <br />
         <Box>
           <Typography variant="caption">{selectedFile.name}</Typography>
         </Box>
@@ -225,31 +224,29 @@ export default function Predictor() {
             />
           </Chart>
 
-          <div>
-            <br />
-            <Typography variant="h5" align="left">
-              Probabilities
-            </Typography>
-            <Chart data={probabilityData} rotated>
-              <ValueScale name="probability" modifyDomain={adjustDomain} />
-              <ArgumentAxis />
-              <ValueAxis
-                scaleName="probability"
-                labelComponent={ValueAxisPercentLabel}
-              />
-              <Stack stacks={[{ series: ["insignificant", "significant"] }]} />
-              <BarSeries
-                valueField="insignificant"
-                argumentField="name"
-                scaleName="probability"
-              />
-              <BarSeries
-                valueField="significant"
-                argumentField="name"
-                scaleName="probability"
-              />
-            </Chart>
-          </div>
+          <br />
+          <Typography variant="h5" align="left">
+            Probabilities
+          </Typography>
+          <Chart data={probabilityData} rotated>
+            <ValueScale name="probability" modifyDomain={adjustDomain} />
+            <ArgumentAxis />
+            <ValueAxis
+              scaleName="probability"
+              labelComponent={ValueAxisPercentLabel}
+            />
+            <Stack stacks={[{ series: ["insignificant", "significant"] }]} />
+            <BarSeries
+              valueField="insignificant"
+              argumentField="name"
+              scaleName="probability"
+            />
+            <BarSeries
+              valueField="significant"
+              argumentField="name"
+              scaleName="probability"
+            />
+          </Chart>
         </Box>
       </div>
     );

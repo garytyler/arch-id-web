@@ -125,11 +125,10 @@ export default function App() {
                 <Predictor />
               </Box>
             </Paper>
+            <Copyright />
           </Container>
-          <Copyright />
         </main>
       </ThemeProvider>
-      {/* </Box> */}
     </div>
   );
 }
