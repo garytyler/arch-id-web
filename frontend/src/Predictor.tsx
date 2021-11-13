@@ -13,36 +13,6 @@ import React, { ChangeEvent, useState } from "react";
 import "./App.css";
 import "./index.css";
 
-const LegendPercentNameLabel = (data: IDataPoint[]) => {
-  const percentages = Object.values(data).map((i) => i.percentage);
-  const minPercentage = Math.min(...percentages);
-  const significantTotal = percentages
-    .filter((i) => i > minPercentage)
-    .map((i) => i - minPercentage)
-    .reduce((a, b) => a + b);
-
-  return (props: Legend.LabelProps) => {
-    for (let i in data) {
-      if (data[i].name === props.text) {
-        const significantPercentage = data[i].percentage - minPercentage;
-        return (
-          <Legend.Label
-            {...props}
-            text={
-              ((significantPercentage / significantTotal) * 100)
-                .toFixed(1)
-                .toString() +
-              "% " +
-              props.text
-            }
-          />
-        );
-      }
-    }
-    return <Legend.Label {...props} />;
-  };
-};
-
 interface IPredictResponse {
   names: string[];
   predictions: number[];
@@ -60,11 +30,87 @@ interface IChartDataPoint extends IDataPoint {
   insignificant: number;
 }
 
+interface Dictionary<T> {
+  [key: string]: T;
+}
+
+const getSignificantPercentages = (data: IDataPoint[]): Dictionary<number> => {
+  const percentages = Object.values(data).map((i) => i.percentage);
+  const minPercentage = Math.min(...percentages);
+  const significantTotal = percentages
+    .filter((i) => i > minPercentage)
+    .map((i) => i - minPercentage)
+    .reduce((a, b) => a + b);
+  const result: Dictionary<number> = {};
+  for (let i in data) {
+    const significantPercentage = data[i].percentage - minPercentage;
+    const name: string = data[i].name;
+    result[name] = (significantPercentage / significantTotal) * 100;
+  }
+  return result;
+};
+
+const LegendPercentNameLabel = (data: IDataPoint[]) => {
+  const significantPercentages = getSignificantPercentages(data);
+  return (props: Legend.LabelProps) => {
+    return (
+      <Legend.Label
+        {...props}
+        text={
+          significantPercentages[props.text.toString()].toFixed(1).toString() +
+          "% " +
+          props.text
+        }
+      />
+    );
+  };
+};
+
 const ValueAxisSymbolLabel =
   (symbol: string) => (props: ValueAxis.LabelProps) => {
     return <ValueAxis.Label {...props} text={props.text + symbol} />;
   };
 const ValueAxisPercentLabel = ValueAxisSymbolLabel("%");
+
+const getCoordinates = (
+  startAngle: number,
+  endAngle: number,
+  maxRadius: number
+) => {
+  const angle = startAngle + (endAngle - startAngle) / 2;
+  const indent = 10;
+  return {
+    x: (maxRadius + indent) * Math.sin(angle),
+    y: (maxRadius + indent) * Math.cos(angle),
+  };
+};
+
+const PieSeriesLabeledPoint = (data: IDataPoint[]) => {
+  const significantPercentages = getSignificantPercentages(data);
+
+  return (props: PieSeries.PointProps) => {
+    console.log(props);
+    const { startAngle, endAngle, maxRadius, arg, val, value } = props;
+    const { x, y } = getCoordinates(startAngle, endAngle, maxRadius);
+
+    return (
+      <React.Fragment>
+        <PieSeries.Point {...props} />
+        <Chart.Label
+          x={arg + x}
+          y={val - y}
+          dominantBaseline="middle"
+          textAnchor="middle"
+        >
+          {props.argument +
+            " (" +
+            significantPercentages[props.argument].toFixed(1).toString() +
+            "%)"}
+        </Chart.Label>
+      </React.Fragment>
+    );
+  };
+};
 
 export default function Predictor() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -166,16 +212,18 @@ export default function Predictor() {
           <Typography variant="h5" align="left">
             Prediction
           </Typography>
-          <div>
-            <Chart data={predictionData}>
-              <ArgumentAxis />
-              <PieSeries valueField="probability" argumentField="name" />
-              <Legend
-                position="left"
-                labelComponent={LegendPercentNameLabel(data)}
-              />
-            </Chart>
-          </div>
+
+          <Chart data={predictionData}>
+            <PieSeries
+              valueField="probability"
+              argumentField="name"
+              pointComponent={PieSeriesLabeledPoint(data)}
+            />
+            <Legend
+              position="top"
+              labelComponent={LegendPercentNameLabel(data)}
+            />
+          </Chart>
 
           <div>
             <br />
