@@ -3,12 +3,11 @@ x-environment:
   API_DOMAIN: &api-domain ""
   APP_DOMAIN: &app-domain ""
   APP_TITLE: &app-title "Architecture Identifier"
-  APP_DESCRIPTION: &app-description "Identify architectural style of buildings with machine learning"
+  APP_DESCRIPTION: &app-description "Identify architectural style using machine learning"
   APP_GITHUB_URL: &app-github-url ""
   APP_AUTHOR_NAME: &author-name "Gary Tyler"
   APP_AUTHOR_URL: &author-url "https://github.com/garytyler"
 
-    
 services:
   frontend:
     container_name: frontend
@@ -16,7 +15,7 @@ services:
       context: ./frontend
       target: production
     environment:
-      REACT_APP_API_DOMAIN: *api-domain      
+      REACT_APP_API_DOMAIN: *api-domain
       REACT_APP_APP_DOMAIN: *app-domain
       REACT_APP_APP_TITLE: *app-title
       REACT_APP_APP_DESCRIPTION: *app-description
@@ -59,9 +58,6 @@ services:
       - --model_config_file=/config/models.prod.config
       - --model_config_file_poll_wait_seconds=300
       - --rest_api_timeout_in_ms=30000
-      # - --enable_batching=true
-      # - --batching_parameters_file=/config/batching_parameters.txt
-      # - --monitoring_config_file=/config/monitoring_config.txt
     environment:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_REGION=${AWS_REGION}
@@ -69,25 +65,6 @@ services:
       - S3_ENDPOINT=${S3_ENDPOINT}
     volumes:
       - ./config:/config
-
-  # models:
-  #   container_name: models
-  #   image: tensorflow/serving:latest-gpu
-  #   ports:
-  #     - 8501:8501
-  #   environment:
-  #     - MODEL_BASE_PATH=/models
-  #     - MODEL_NAME=InceptionResNetV2-imagenet
-  #   volumes:
-  #     - ./models:/models
-
-  # train:
-  #   ports:
-  #     - 6006:6006
-  #   volumes:
-  #     - .:/srv:rw"
-  #     - ${DATASET_DIR:-./dataset}:/dataset:ro
-  #     - ${OUTPUT_DIR:-./output}:/output
 
 volumes:
   postgres_data: null
