@@ -2,8 +2,6 @@ import {
   AppBar,
   Box,
   Container,
-  // Step,
-  // StepLabel,
   CssBaseline,
   Link,
   Paper,
@@ -14,14 +12,15 @@ import {
 import { createTheme, makeStyles } from "@material-ui/core/styles";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { default as React } from "react";
-import { REACT_APP_DOMAIN, REACT_APP_TITLE } from "./env";
+import { APP_DESCRIPTION, APP_TITLE, AUTHOR_NAME, AUTHOR_URL } from "./env";
 import Predictor from "./Predictor";
+
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
       {"Copyright © "}
-      <Link color="inherit" href={REACT_APP_DOMAIN}>
-        {REACT_APP_TITLE}
+      <Link color="inherit" href={AUTHOR_URL}>
+        {AUTHOR_NAME}
       </Link>{" "}
       {new Date().getFullYear()}
       {"."}
@@ -53,8 +52,10 @@ const useStyles = makeStyles(
       },
     },
     container: {
-      paddingTop: theme.spacing(4),
       paddingBottom: theme.spacing(4),
+      [theme.breakpoints.up(600 + theme.spacing(2) * 2)]: {
+        paddingTop: theme.spacing(4),
+      },
     },
     paper: {
       elevation: 6,
@@ -103,14 +104,18 @@ export default function App() {
 
   return (
     <div className={classes.root}>
-      {/* <Box style={{ backgroundColor: "blue" }}> */}
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <AppBar color="default" position="absolute" className={classes.appBar}>
           <Toolbar>
-            <Typography variant="h6" color="inherit" noWrap>
-              {REACT_APP_TITLE}
-            </Typography>
+            <Box marginY={1}>
+              <Typography variant="h6" color="inherit" noWrap>
+                {APP_TITLE}
+                <Typography variant="subtitle2" color="textSecondary">
+                  {APP_DESCRIPTION}
+                </Typography>
+              </Typography>
+            </Box>
           </Toolbar>
         </AppBar>
         <main className={classes.content}>

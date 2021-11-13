@@ -11,9 +11,9 @@ import React, { ChangeEvent, useState } from "react";
 import { VerticalBarSeriesPoint } from "react-vis";
 import "./App.css";
 import "./index.css";
-import { CLASS_NAMES } from "./settings";
 
 interface IPredictResponse {
+  names: string[];
   predictions: number[];
   probabilities: number[];
 }
@@ -44,7 +44,7 @@ export default function Predictor() {
           for (let i = 0; i < response.data.predictions.length; i++) {
             probs.push({
               y: response.data.probabilities[i],
-              x: CLASS_NAMES[i],
+              x: response.data.names[i],
             });
           }
           console.log(probs);

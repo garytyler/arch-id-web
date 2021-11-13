@@ -1,12 +1,28 @@
+x-environment:
+  &shared-environment # Pass to build environments and containers for all services
+  API_DOMAIN: &api-domain ""
+  APP_DOMAIN: &app-domain ""
+  APP_TITLE: &app-title "Architecture Identifier"
+  APP_DESCRIPTION: &app-description "Identify architectural style of buildings with machine learning"
+  APP_GITHUB_URL: &app-github-url ""
+  APP_AUTHOR_NAME: &author-name "Gary Tyler"
+  APP_AUTHOR_URL: &author-url "https://github.com/garytyler"
+
+    
 services:
   frontend:
     container_name: frontend
     build:
       context: ./frontend
       target: production
-    environment: 
-      - "REACT_APP_TITLE=Architecture Recognizer"
-      - "REACT_APP_DOMAIN=architecture-recognizer.com"
+    environment:
+      REACT_APP_API_DOMAIN: *api-domain      
+      REACT_APP_APP_DOMAIN: *app-domain
+      REACT_APP_APP_TITLE: *app-title
+      REACT_APP_APP_DESCRIPTION: *app-description
+      REACT_APP_APP_GITHUB_URL: *app-github-url
+      REACT_APP_AUTHOR_NAME: *author-name
+      REACT_APP_AUTHOR_URL: *author-url
     ports:
       - 3000:3000
 

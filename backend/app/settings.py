@@ -7,7 +7,7 @@ import tensorflow as tf
 CLASS_NAMES = [
     "Achaemenid",
     "American Foursquare",
-    "American craftsman style",
+    "American Craftsman",
     "Ancient Egyptian",
     "Art Deco",
     "Art Nouveau",
@@ -22,7 +22,7 @@ CLASS_NAMES = [
     "Georgian",
     "Gothic",
     "Greek Revival",
-    "International style",
+    "International",
     "Novelty",
     "Palladian",
     "Postmodern",

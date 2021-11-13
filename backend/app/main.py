@@ -1,3 +1,4 @@
+# import json
 import json
 from io import BytesIO
 from typing import List, Tuple
@@ -42,17 +43,11 @@ async def predict(
         )
     predictions = response.json()["predictions"][0]
     probabilities = tf.nn.softmax(predictions).numpy().tolist()
-    return {"predictions": predictions, "probabilities": probabilities}
-    # return {
-    #     "predictions": {
-    #         CLASS_NAMES[index]: prediction
-    #         for index, prediction in enumerate(predictions)
-    #     },
-    #     "probabilities": {
-    #         CLASS_NAMES[index]: probability
-    #         for index, probability in enumerate(probabilities)
-    #     },
-    # }
+    return {
+        "names": CLASS_NAMES,
+        "predictions": predictions,
+        "probabilities": probabilities,
+    }
 
 
 def get_app():
