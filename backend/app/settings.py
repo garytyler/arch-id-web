@@ -22,7 +22,7 @@ CLASS_NAMES = [
     "Georgian",
     "Gothic",
     "Greek Revival",
-    "International",
+    "International Style",
     "Novelty",
     "Palladian",
     "Postmodern",

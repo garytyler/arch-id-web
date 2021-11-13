@@ -3,36 +3,72 @@ import {
   ArgumentAxis,
   BarSeries,
   Chart,
-  Title,
+  Legend,
+  PieSeries,
   ValueAxis,
 } from "@devexpress/dx-react-chart-material-ui";
-// import { LineProps } from "@devexpress/dx-react-chart-material-ui/ValueAxis";
-import { Box, Button } from "@material-ui/core";
-import Typography from "@material-ui/core/Typography";
+import { Box, Button, Typography } from "@material-ui/core";
 import axios from "axios";
 import React, { ChangeEvent, useState } from "react";
 import "./App.css";
 import "./index.css";
+
+const LegendPercentNameLabel = (data: IDataPoint[]) => {
+  const percentages = Object.values(data).map((i) => i.percentage);
+  const minPercentage = Math.min(...percentages);
+  const significantTotal = percentages
+    .filter((i) => i > minPercentage)
+    .map((i) => i - minPercentage)
+    .reduce((a, b) => a + b);
+
+  return (props: Legend.LabelProps) => {
+    for (let i in data) {
+      if (data[i].name === props.text) {
+        const significantPercentage = data[i].percentage - minPercentage;
+        return (
+          <Legend.Label
+            {...props}
+            text={
+              ((significantPercentage / significantTotal) * 100)
+                .toFixed(1)
+                .toString() +
+              "% " +
+              props.text
+            }
+          />
+        );
+      }
+    }
+    return <Legend.Label {...props} />;
+  };
+};
 
 interface IPredictResponse {
   names: string[];
   predictions: number[];
   probabilities: number[];
 }
-interface IProbabilityChartDataPoint {
+
+interface IDataPoint {
   name: string;
   probability: number;
   percentage: number;
 }
 
-const Label = (symbol: string) => (props: ValueAxis.LabelProps) => {
-  return <ValueAxis.Label {...props} text={props.text + symbol} />;
-};
-const PercentLabel = Label("%");
+interface IChartDataPoint extends IDataPoint {
+  significant: number;
+  insignificant: number;
+}
+
+const ValueAxisSymbolLabel =
+  (symbol: string) => (props: ValueAxis.LabelProps) => {
+    return <ValueAxis.Label {...props} text={props.text + symbol} />;
+  };
+const ValueAxisPercentLabel = ValueAxisSymbolLabel("%");
 
 export default function Predictor() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [chartData, setChartData] = useState<IProbabilityChartDataPoint[]>([]);
+  const [data, setChartData] = useState<IDataPoint[]>([]);
 
   const changeHandler = (event: ChangeEvent<HTMLInputElement> | null) => {
     if (event?.target?.files) {
@@ -50,7 +86,7 @@ export default function Predictor() {
           { headers: { "content-Type": "multipart/form-data" } }
         )
         .then((response) => {
-          const probs: IProbabilityChartDataPoint[] = [];
+          const probs: IDataPoint[] = [];
           for (let i = 0; i < response.data.predictions.length; i++) {
             probs.push({
               name: response.data.names[i],
@@ -81,42 +117,42 @@ export default function Predictor() {
       </label>
     );
   };
-  const percentages = Object.values(chartData).map((i) => i.percentage);
-  const adjustDomain = ([start, end]: any) => {
+
+  const adjustDomain = () => {
+    const percentages = Object.values(data).map((i) => i.percentage);
     return [
       Math.floor(Math.min(...percentages)),
       Math.ceil(Math.max(...percentages)),
     ];
   };
 
-  if (selectedFile && chartData.length > 0) {
-    const sortedChartData: Object[] = [];
-    for (let i in chartData) {
-      const { percentage } = chartData[i];
-      const thisItem = {
-        ...chartData[i],
-        ...{ significant: 0.5, insignificant: 0.5 },
+  if (selectedFile && data.length > 0) {
+    const percentages = Object.values(data).map((i) => i.percentage);
+    const predictionData: IChartDataPoint[] = [];
+    const probabilityData: IChartDataPoint[] = [];
+    for (let i in data) {
+      const { percentage } = data[i];
+      const chartDataItem = {
+        ...data[i],
+        ...{ significant: 0, insignificant: 0 },
       };
-      if (percentage > Math.min(...percentages)) {
-        thisItem.significant = percentage;
+      if (percentage > Math.min(...percentages) + 0.1) {
+        chartDataItem.significant = percentage;
+        predictionData.push(chartDataItem);
       } else {
-        thisItem.insignificant = percentage;
+        chartDataItem.insignificant = percentage;
       }
-      sortedChartData[i] = thisItem;
+      probabilityData[i] = chartDataItem;
     }
 
     return (
       <div>
         <Box>{input()}</Box>
-
         <br />
-
         <Box>
           <Typography variant="caption">{selectedFile.name}</Typography>
         </Box>
-
         <br />
-
         <Box>
           <img
             src={URL.createObjectURL(selectedFile)}
@@ -125,28 +161,47 @@ export default function Predictor() {
             height={200}
           />
         </Box>
-
         <br />
-
         <Box className="results-panel">
-          <Chart data={sortedChartData} rotated>
-            <Title text="Probabilities" />
-            <ValueScale name="probability" modifyDomain={adjustDomain} />
-            <ArgumentAxis />
-            <ValueAxis scaleName="probability" labelComponent={PercentLabel} />
-            <Stack stacks={[{ series: ["insignificant", "significant"] }]} />
-            <BarSeries
-              valueField="insignificant"
-              argumentField="name"
-              scaleName="probability"
-            />
-            <BarSeries
-              valueField="significant"
-              argumentField="name"
-              scaleName="probability"
-            />
-            {/* <Legend /> */}
-          </Chart>
+          <Typography variant="h5" align="left">
+            Prediction
+          </Typography>
+          <div>
+            <Chart data={predictionData}>
+              <ArgumentAxis />
+              <PieSeries valueField="probability" argumentField="name" />
+              <Legend
+                position="left"
+                labelComponent={LegendPercentNameLabel(data)}
+              />
+            </Chart>
+          </div>
+
+          <div>
+            <br />
+            <Typography variant="h5" align="left">
+              Probabilities
+            </Typography>
+            <Chart data={probabilityData} rotated>
+              <ValueScale name="probability" modifyDomain={adjustDomain} />
+              <ArgumentAxis />
+              <ValueAxis
+                scaleName="probability"
+                labelComponent={ValueAxisPercentLabel}
+              />
+              <Stack stacks={[{ series: ["insignificant", "significant"] }]} />
+              <BarSeries
+                valueField="insignificant"
+                argumentField="name"
+                scaleName="probability"
+              />
+              <BarSeries
+                valueField="significant"
+                argumentField="name"
+                scaleName="probability"
+              />
+            </Chart>
+          </div>
         </Box>
       </div>
     );
