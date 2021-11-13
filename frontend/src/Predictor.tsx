@@ -86,11 +86,9 @@ const getCoordinates = (
 };
 
 const PieSeriesLabeledPoint = (data: IDataPoint[]) => {
-  const significantPercentages = getSignificantPercentages(data);
-
   return (props: PieSeries.PointProps) => {
     console.log(props);
-    const { startAngle, endAngle, maxRadius, arg, val, value } = props;
+    const { startAngle, endAngle, maxRadius, arg, val } = props;
     const { x, y } = getCoordinates(startAngle, endAngle, maxRadius);
 
     return (
@@ -102,10 +100,7 @@ const PieSeriesLabeledPoint = (data: IDataPoint[]) => {
           dominantBaseline="middle"
           textAnchor="middle"
         >
-          {props.argument +
-            " (" +
-            significantPercentages[props.argument].toFixed(1).toString() +
-            "%)"}
+          {props.argument}
         </Chart.Label>
       </React.Fragment>
     );
