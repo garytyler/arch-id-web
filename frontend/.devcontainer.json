@@ -1,5 +1,5 @@
 {
-    "name": "frontend",
+    "name": "arch-id-frontend",
     "dockerComposeFile": [
         "../docker-compose.yml",
         "../docker-compose.override.yml"

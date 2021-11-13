@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "arch-recognizer-web-backend"
+name = "arch-id-backend"
 version = "0.1.0"
 description = ""
 authors = ["Gary Tyler <mail@garytyler.com>"]

@@ -1,5 +1,5 @@
 {
-    "name": "arch-recognizer-backend",
+    "name": "arch-id-backend",
     "dockerComposeFile": [
         "../docker-compose.yml",
         "../docker-compose.override.yml"
