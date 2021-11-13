@@ -1,14 +1,16 @@
-import { Animation } from "@devexpress/dx-react-chart";
+import { Stack, ValueScale } from "@devexpress/dx-react-chart";
 import {
   ArgumentAxis,
   BarSeries,
   Chart,
+  Title,
+  ValueAxis,
 } from "@devexpress/dx-react-chart-material-ui";
+// import { LineProps } from "@devexpress/dx-react-chart-material-ui/ValueAxis";
 import { Box, Button } from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
 import axios from "axios";
 import React, { ChangeEvent, useState } from "react";
-import { VerticalBarSeriesPoint } from "react-vis";
 import "./App.css";
 import "./index.css";
 
@@ -17,13 +19,22 @@ interface IPredictResponse {
   predictions: number[];
   probabilities: number[];
 }
+interface IProbabilityChartDataPoint {
+  name: string;
+  probability: number;
+  percentage: number;
+}
+
+const Label = (symbol: string) => (props: ValueAxis.LabelProps) => {
+  return <ValueAxis.Label {...props} text={props.text + symbol} />;
+};
+const PercentLabel = Label("%");
 
 export default function Predictor() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [chartData, setChartData] = useState<VerticalBarSeriesPoint[]>([]);
+  const [chartData, setChartData] = useState<IProbabilityChartDataPoint[]>([]);
 
   const changeHandler = (event: ChangeEvent<HTMLInputElement> | null) => {
-    console.log(event);
     if (event?.target?.files) {
       const file = event.target.files[0];
       setSelectedFile(file);
@@ -39,15 +50,14 @@ export default function Predictor() {
           { headers: { "content-Type": "multipart/form-data" } }
         )
         .then((response) => {
-          const probs: VerticalBarSeriesPoint[] = [];
-          console.log(response.data);
+          const probs: IProbabilityChartDataPoint[] = [];
           for (let i = 0; i < response.data.predictions.length; i++) {
             probs.push({
-              y: response.data.probabilities[i],
-              x: response.data.names[i],
+              name: response.data.names[i],
+              probability: response.data.probabilities[i],
+              percentage: response.data.probabilities[i] * 100,
             });
           }
-          console.log(probs);
           setChartData(probs);
         })
         .catch((error) => console.error(error));
@@ -71,8 +81,30 @@ export default function Predictor() {
       </label>
     );
   };
+  const percentages = Object.values(chartData).map((i) => i.percentage);
+  const adjustDomain = ([start, end]: any) => {
+    return [
+      Math.floor(Math.min(...percentages)),
+      Math.ceil(Math.max(...percentages)),
+    ];
+  };
 
   if (selectedFile && chartData.length > 0) {
+    const sortedChartData: Object[] = [];
+    for (let i in chartData) {
+      const { percentage } = chartData[i];
+      const thisItem = {
+        ...chartData[i],
+        ...{ significant: 0.5, insignificant: 0.5 },
+      };
+      if (percentage > Math.min(...percentages)) {
+        thisItem.significant = percentage;
+      } else {
+        thisItem.insignificant = percentage;
+      }
+      sortedChartData[i] = thisItem;
+    }
+
     return (
       <div>
         <Box>{input()}</Box>
@@ -97,10 +129,23 @@ export default function Predictor() {
         <br />
 
         <Box className="results-panel">
-          <Chart data={chartData} rotated>
+          <Chart data={sortedChartData} rotated>
+            <Title text="Probabilities" />
+            <ValueScale name="probability" modifyDomain={adjustDomain} />
             <ArgumentAxis />
-            <BarSeries valueField="y" argumentField="x" />
-            <Animation />
+            <ValueAxis scaleName="probability" labelComponent={PercentLabel} />
+            <Stack stacks={[{ series: ["insignificant", "significant"] }]} />
+            <BarSeries
+              valueField="insignificant"
+              argumentField="name"
+              scaleName="probability"
+            />
+            <BarSeries
+              valueField="significant"
+              argumentField="name"
+              scaleName="probability"
+            />
+            {/* <Legend /> */}
           </Chart>
         </Box>
       </div>
