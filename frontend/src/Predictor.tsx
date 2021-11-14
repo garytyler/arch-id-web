@@ -34,9 +34,15 @@ interface IPredictResponse {
   probabilities: number[];
 }
 
-interface IDataPoint {
-  name: string;
+interface IPredictResponseItem {
+  prediction: number;
   probability: number;
+  name: string;
+  displayName: string;
+  wikipediaUrl: string;
+}
+
+interface IDataPoint extends IPredictResponseItem {
   percent: number;
 }
 
@@ -47,7 +53,7 @@ interface IChartDataPoint extends IDataPoint {
   insignificantMargin: number;
 }
 
-const getChartData = (data: IDataPoint[]): IChartDataPoint[] => {
+const createChartData = (data: IDataPoint[]): IChartDataPoint[] => {
   const percents = Object.values(data).map((i) => i.percent);
   const minPercent = Math.min(...percents);
   const signifTotal = percents
@@ -110,20 +116,20 @@ const ValueAxisSymbolLabel =
 
 const ValueAxisPercentLabel = ValueAxisSymbolLabel("%");
 
-const getCoordinates = (
-  startAngle: number,
-  endAngle: number,
-  maxRadius: number
-) => {
-  const angle = startAngle + (endAngle - startAngle) / 2;
-  const indent = 10;
-  return {
-    x: (maxRadius + indent) * Math.sin(angle),
-    y: (maxRadius + indent) * Math.cos(angle),
-  };
-};
-
 const PieSeriesLabeledPoint = (data: IChartDataPoint[]) => {
+  const getCoordinates = (
+    startAngle: number,
+    endAngle: number,
+    maxRadius: number
+  ) => {
+    const angle = startAngle + (endAngle - startAngle) / 2;
+    const indent = 10;
+    return {
+      x: (maxRadius + indent) * Math.sin(angle),
+      y: (maxRadius + indent) * Math.cos(angle),
+    };
+  };
+
   const valuesByName: Dictionary<number> = {};
   for (let i in data) {
     const name: string = data[i].name;
@@ -197,7 +203,7 @@ const useStyles = makeStyles(
 
 export default function Predictor() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [data, setChartData] = useState<IDataPoint[]>([]);
+  const [chartData, setChartData] = useState<IChartDataPoint[]>([]);
   const classes = useStyles();
 
   const changeHandler = (event: ChangeEvent<HTMLInputElement> | null) => {
@@ -210,21 +216,24 @@ export default function Predictor() {
       formData.append("files", file);
 
       axios
-        .post<IPredictResponse>(
-          `${window.location.protocol}//${API_DOMAIN}/predict/InceptionResNetV2-imagenet`,
+        .post<IPredictResponseItem[]>(
+          `${window.location.protocol}//${API_DOMAIN}/api/predict/InceptionResNetV2-imagenet`,
           formData,
           { headers: { "content-Type": "multipart/form-data" } }
         )
         .then((response) => {
-          const probs: IDataPoint[] = [];
-          for (let i = 0; i < response.data.predictions.length; i++) {
-            probs.push({
-              name: response.data.names[i],
-              probability: response.data.probabilities[i],
-              percent: response.data.probabilities[i] * 100,
+          const data: IDataPoint[] = [];
+          for (let i = 0; i < response.data.length; i++) {
+            data.push({
+              prediction: response.data[i].prediction,
+              probability: response.data[i].probability,
+              name: response.data[i].name,
+              displayName: response.data[i].displayName,
+              wikipediaUrl: response.data[i].wikipediaUrl,
+              percent: response.data[i].probability * 100,
             });
           }
-          setChartData(probs);
+          setChartData(createChartData(data));
         })
         .catch((error: AxiosError) => console.error(error));
     }
@@ -255,15 +264,14 @@ export default function Predictor() {
   };
 
   const adjustDomain = () => {
-    const percents = Object.values(data).map((i) => i.percent);
+    const percents = Object.values(chartData).map((i) => i.percent);
     return [
       Math.floor(Math.min(...percents)),
       Math.ceil(Math.max(...percents)),
     ];
   };
 
-  if (selectedFile && data.length > 0) {
-    const chartData = getChartData(data);
+  if (selectedFile && chartData.length > 0) {
     const pieChartData = chartData.filter((i) => i.significant > 0);
     return (
       <div>

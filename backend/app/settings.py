@@ -1,84 +1,157 @@
-import logging
-from pathlib import Path
-from typing import Callable, Tuple
+from typing import List
 
 import tensorflow as tf
 
-CLASS_NAMES = [
-    "Achaemenid",
-    "American Foursquare",
-    "American Craftsman",
-    "Ancient Egyptian",
-    "Art Deco",
-    "Art Nouveau",
-    "Baroque",
-    "Bauhaus",
-    "Beaux-Arts",
-    "Byzantine",
-    "Chicago school",
-    "Colonial",
-    "Deconstructivism",
-    "Edwardian",
-    "Georgian",
-    "Gothic",
-    "Greek Revival",
-    "International Style",
-    "Novelty",
-    "Palladian",
-    "Postmodern",
-    "Queen Anne",
-    "Romanesque",
-    "Russian Revival",
-    "Tudor Revival",
+from .utils import BaseCNN
+
+CLASSES: List[dict] = [
+    {
+        "name": "Achaemenid architecture",
+        "display_name": "Achaemenid",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Achaemenid_architecture",
+    },
+    {
+        "name": "American craftsman style",
+        "display_name": "American Craftsman",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/American_Craftsman",
+    },
+    {
+        "name": "American Foursquare architecture",
+        "display_name": "American Foursquare",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/American_Foursquare",
+    },
+    {
+        "name": "Ancient Egyptian architecture",
+        "display_name": "Ancient Egyptian",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Ancient_Egyptian_architecture",
+    },
+    {
+        "name": "Art Deco architecture",
+        "display_name": "Art Deco",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Art_Deco",
+    },
+    {
+        "name": "Art Nouveau architecture",
+        "display_name": "Art Nouveau",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Art_Nouveau",
+    },
+    {
+        "name": "Baroque architecture",
+        "display_name": "Baroque",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Baroque_architecture",
+    },
+    {
+        "name": "Bauhaus architecture",
+        "display_name": "Bauhaus",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Bauhaus",
+    },
+    {
+        "name": "Beaux-Arts architecture",
+        "display_name": "Beaux-Arts",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Beaux-Arts_architecture",
+    },
+    {
+        "name": "Byzantine architecture",
+        "display_name": "Byzantine",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Byzantine_architecture",
+    },
+    {
+        "name": "Chicago school architecture",
+        "display_name": "Chicago school",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Chicago_school_(architecture)",
+    },
+    {
+        "name": "Colonial architecture",
+        "display_name": "Colonial",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Colonial_architecture",
+    },
+    {
+        "name": "Deconstructivism",
+        "display_name": "Deconstructivism",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Deconstructivism",
+    },
+    {
+        "name": "Edwardian architecture",
+        "display_name": "Edwardian",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Edwardian_architecture",
+    },
+    {
+        "name": "Georgian architecture",
+        "display_name": "Georgian",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Georgian_architecture",
+    },
+    {
+        "name": "Gothic architecture",
+        "display_name": "Gothic",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Gothic_architecture",
+    },
+    {
+        "name": "Greek Revival architecture",
+        "display_name": "Greek Revival",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Greek_Revival_architecture",
+    },
+    {
+        "name": "International style",
+        "display_name": "International Style",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/International_Style_(architecture)",
+    },
+    {
+        "name": "Novelty architecture",
+        "display_name": "Novelty",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Novelty_architecture",
+    },
+    {
+        "name": "Palladian architecture",
+        "display_name": "Palladian",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Palladian_architecture",
+    },
+    {
+        "name": "Postmodern architecture",
+        "display_name": "Postmodern",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Postmodern_architecture",
+    },
+    {
+        "name": "Queen Anne architecture",
+        "display_name": "Queen Anne",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Queen_Anne_style_architecture",
+    },
+    {
+        "name": "Romanesque architecture",
+        "display_name": "Romanesque",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Romanesque_architecture",
+    },
+    {
+        "name": "Russian Revival architecture",
+        "display_name": "Russian Revival",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Russian_Revival_architecture",
+    },
+    {
+        "name": "Tudor Revival architecture",
+        "display_name": "Tudor Revival",
+        "wikipedia_url": "https://en.wikipedia.org/wiki/Tudor_Revival_architecture",
+    },
 ]
 
 
-class BaseCNN:
-    def __init__(self, name: str, base_model: tf.keras.Model, preprocess: Callable):
-        self.name = name
-        self.base_model = base_model
-        self.preprocess = preprocess
-
-
 BASE_CNNS = {
-    tf.keras.applications.VGG19.__name__: BaseCNN(
-        name=tf.keras.applications.VGG19.__name__,
-        preprocess=tf.keras.applications.vgg19.preprocess_input,
-        base_model=tf.keras.applications.VGG19,
-    ),
-    tf.keras.applications.ResNet50V2.__name__: BaseCNN(
-        name=tf.keras.applications.ResNet50V2.__name__,
-        preprocess=tf.keras.applications.resnet.preprocess_input,
-        base_model=tf.keras.applications.ResNet50V2,
-    ),
-    tf.keras.applications.ResNet152V2.__name__: BaseCNN(
-        name=tf.keras.applications.ResNet152V2.__name__,
-        preprocess=tf.keras.applications.resnet.preprocess_input,
-        base_model=tf.keras.applications.ResNet152V2,
+    tf.keras.applications.InceptionResNetV2.__name__: BaseCNN(
+        name=tf.keras.applications.InceptionResNetV2.__name__,
+        preprocess=tf.keras.applications.inception_resnet_v2.preprocess_input,
+        base_model=tf.keras.applications.InceptionResNetV2,
     ),
     tf.keras.applications.InceptionV3.__name__: BaseCNN(
         name=tf.keras.applications.InceptionV3.__name__,
         preprocess=tf.keras.applications.inception_v3.preprocess_input,
         base_model=tf.keras.applications.InceptionV3,
     ),
-    tf.keras.applications.InceptionResNetV2.__name__: BaseCNN(
-        name=tf.keras.applications.InceptionResNetV2.__name__,
-        preprocess=tf.keras.applications.inception_resnet_v2.preprocess_input,
-        base_model=tf.keras.applications.InceptionResNetV2,
+    tf.keras.applications.ResNet152V2.__name__: BaseCNN(
+        name=tf.keras.applications.ResNet152V2.__name__,
+        preprocess=tf.keras.applications.resnet.preprocess_input,
+        base_model=tf.keras.applications.ResNet152V2,
     ),
-    tf.keras.applications.MobileNetV2.__name__: BaseCNN(
-        name=tf.keras.applications.MobileNetV2.__name__,
-        preprocess=tf.keras.applications.mobilenet_v2.preprocess_input,
-        base_model=tf.keras.applications.MobileNetV2,
-    ),
-    tf.keras.applications.DenseNet201.__name__: BaseCNN(
-        name=tf.keras.applications.DenseNet201.__name__,
-        preprocess=tf.keras.applications.densenet.preprocess_input,
-        base_model=tf.keras.applications.DenseNet201,
-    ),
-    tf.keras.applications.EfficientNetB7.__name__: BaseCNN(
-        name=tf.keras.applications.EfficientNetB7.__name__,
-        preprocess=tf.keras.applications.efficientnet.preprocess_input,
-        base_model=tf.keras.applications.EfficientNetB7,
+    tf.keras.applications.VGG19.__name__: BaseCNN(
+        name=tf.keras.applications.VGG19.__name__,
+        preprocess=tf.keras.applications.vgg19.preprocess_input,
+        base_model=tf.keras.applications.VGG19,
     ),
 }

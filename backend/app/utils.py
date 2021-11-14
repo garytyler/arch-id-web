@@ -1,3 +1,5 @@
+from typing import Callable
+
 import tensorflow as tf
 
 
@@ -10,3 +12,10 @@ def image_path_to_array(img_path):
     img_array -= 1.0
     img_array = tf.expand_dims(img_array, axis=0).numpy().tolist()
     return img_array
+
+
+class BaseCNN:
+    def __init__(self, name: str, base_model: tf.keras.Model, preprocess: Callable):
+        self.name = name
+        self.base_model = base_model
+        self.preprocess = preprocess

@@ -3,7 +3,7 @@ import json
 import httpx
 import numpy as np
 import tensorflow as tf
-from app.settings import CLASS_NAMES
+from app.settings import CLASSES
 from app.utils import image_path_to_array
 
 
@@ -19,15 +19,12 @@ def test_tf_serving(sample_image_path):
     )
     predictions = r.json()["predictions"][0]
     scores = tf.nn.softmax(predictions)
-    pred_y = CLASS_NAMES[np.argmax(scores)]
+    pred_y = CLASSES[np.argmax(scores)]
     true_y = img_path.parent.name
     print(
         f"path: {img_path}"
         f"\npred: {pred_y}"
         f"\ntrue: {true_y}"
         f"\nconf: {100 * np.max(scores):.2f}%",
-        *(
-            f"\n\t{n:0>2}-{CLASS_NAMES[n]:.<25}{100 * i:.2f}%"
-            for n, i in enumerate(scores)
-        ),
+        *(f"\n\t{n:0>2}-{CLASSES[n]:.<25}{100 * i:.2f}%" for n, i in enumerate(scores)),
     )
