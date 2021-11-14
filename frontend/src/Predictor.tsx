@@ -23,6 +23,10 @@ import "./App.css";
 import Copyright from "./Copyright";
 import "./index.css";
 
+interface Dictionary<T> {
+  [key: string]: T;
+}
+
 interface IPredictResponse {
   names: string[];
   predictions: number[];
@@ -32,44 +36,66 @@ interface IPredictResponse {
 interface IDataPoint {
   name: string;
   probability: number;
-  percentage: number;
+  percent: number;
 }
 
 interface IChartDataPoint extends IDataPoint {
   significant: number;
   insignificant: number;
+  significantMargin: number;
+  insignificantMargin: number;
 }
 
-interface Dictionary<T> {
-  [key: string]: T;
-}
-
-const getSignificantPercentages = (data: IDataPoint[]): Dictionary<number> => {
-  const percentages = Object.values(data).map((i) => i.percentage);
-  const minPercentage = Math.min(...percentages);
-  const significantTotal = percentages
-    .filter((i) => i > minPercentage)
-    .map((i) => i - minPercentage)
+const getChartData = (data: IDataPoint[]): IChartDataPoint[] => {
+  const percents = Object.values(data).map((i) => i.percent);
+  const minPercent = Math.min(...percents);
+  const signifTotal = percents
+    .filter((i) => i > minPercent)
+    .map((i) => i - minPercent)
     .reduce((a, b) => a + b);
-  const result: Dictionary<number> = {};
+  const result: IChartDataPoint[] = [];
   for (let i in data) {
-    const significantPercentage = data[i].percentage - minPercentage;
-    const name: string = data[i].name;
-    result[name] = (significantPercentage / significantTotal) * 100;
+    const percentMargin = ((data[i].percent - minPercent) / signifTotal) * 100;
+    if (data[i].percent > minPercent + 0.1) {
+      result[i] = {
+        ...data[i],
+        ...{
+          significant: data[i].percent,
+          insignificant: 0,
+          significantMargin: percentMargin,
+          insignificantMargin: 0,
+        },
+      };
+    } else {
+      result[i] = {
+        ...data[i],
+        ...{
+          significant: 0,
+          insignificant: data[i].percent,
+          significantMargin: 0,
+          insignificantMargin: percentMargin,
+        },
+      };
+    }
   }
   return result;
 };
 
-const LegendPercentNameLabel = (data: IDataPoint[]) => {
-  const significantPercentages = getSignificantPercentages(data);
+const LegendPercentLabel = (data: IChartDataPoint[]) => {
+  const valuesByName: Dictionary<number> = {};
+  for (let i in data) {
+    const name: string = data[i].name;
+    valuesByName[name] = data[i].significantMargin;
+  }
   return (props: Legend.LabelProps) => {
     return (
       <Legend.Label
         {...props}
         text={
-          significantPercentages[props.text.toString()].toFixed(1).toString() +
-          "% " +
-          props.text
+          props.text +
+          " (" +
+          valuesByName[props.text.toString()].toFixed(1).toString() +
+          "%)"
         }
       />
     );
@@ -80,6 +106,7 @@ const ValueAxisSymbolLabel =
   (symbol: string) => (props: ValueAxis.LabelProps) => {
     return <ValueAxis.Label {...props} text={props.text + symbol} />;
   };
+
 const ValueAxisPercentLabel = ValueAxisSymbolLabel("%");
 
 const getCoordinates = (
@@ -95,11 +122,17 @@ const getCoordinates = (
   };
 };
 
-const PieSeriesLabeledPoint = (data: IDataPoint[]) => {
+const PieSeriesLabeledPoint = (data: IChartDataPoint[]) => {
+  const valuesByName: Dictionary<number> = {};
+  for (let i in data) {
+    const name: string = data[i].name;
+    valuesByName[name] = data[i].significantMargin;
+  }
+
   return (props: PieSeries.PointProps) => {
-    console.log(props);
     const { startAngle, endAngle, maxRadius, arg, val } = props;
-    const { x, y } = getCoordinates(startAngle, endAngle, maxRadius);
+
+    const { x, y } = getCoordinates(startAngle, endAngle, maxRadius * 0.8);
 
     return (
       <React.Fragment>
@@ -110,7 +143,7 @@ const PieSeriesLabeledPoint = (data: IDataPoint[]) => {
           dominantBaseline="middle"
           textAnchor="middle"
         >
-          {props.argument}
+          {valuesByName[props.argument].toFixed(1).toString() + "%"}
         </Chart.Label>
       </React.Fragment>
     );
@@ -133,10 +166,9 @@ const useStyles = makeStyles(
       },
     },
     paper: {
-      elevation: 6,
+      elevation: 10,
     },
     outerBox: {
-      // elevation: 6,
       marginTop: theme.spacing(3),
       marginBottom: theme.spacing(3),
       padding: theme.spacing(2),
@@ -188,7 +220,7 @@ export default function Predictor() {
             probs.push({
               name: response.data.names[i],
               probability: response.data.probabilities[i],
-              percentage: response.data.probabilities[i] * 100,
+              percent: response.data.probabilities[i] * 100,
             });
           }
           setChartData(probs);
@@ -222,32 +254,16 @@ export default function Predictor() {
   };
 
   const adjustDomain = () => {
-    const percentages = Object.values(data).map((i) => i.percentage);
+    const percents = Object.values(data).map((i) => i.percent);
     return [
-      Math.floor(Math.min(...percentages)),
-      Math.ceil(Math.max(...percentages)),
+      Math.floor(Math.min(...percents)),
+      Math.ceil(Math.max(...percents)),
     ];
   };
 
   if (selectedFile && data.length > 0) {
-    const percentages = Object.values(data).map((i) => i.percentage);
-    const predictionData: IChartDataPoint[] = [];
-    const probabilityData: IChartDataPoint[] = [];
-    for (let i in data) {
-      const { percentage } = data[i];
-      const chartDataItem = {
-        ...data[i],
-        ...{ significant: 0, insignificant: 0 },
-      };
-      if (percentage > Math.min(...percentages) + 0.1) {
-        chartDataItem.significant = percentage;
-        predictionData.push(chartDataItem);
-      } else {
-        chartDataItem.insignificant = percentage;
-      }
-      probabilityData[i] = chartDataItem;
-    }
-
+    const chartData = getChartData(data);
+    const pieChartData = chartData.filter((i) => i.significant > 0);
     return (
       <div>
         <Container className={classes.container}>
@@ -272,15 +288,15 @@ export default function Predictor() {
                   Prediction
                 </Typography>
 
-                <Chart data={predictionData}>
+                <Chart data={pieChartData}>
                   <PieSeries
-                    valueField="probability"
+                    valueField="significantMargin"
                     argumentField="name"
-                    pointComponent={PieSeriesLabeledPoint(data)}
+                    pointComponent={PieSeriesLabeledPoint(pieChartData)}
                   />
                   <Legend
                     position="top"
-                    labelComponent={LegendPercentNameLabel(data)}
+                    labelComponent={LegendPercentLabel(pieChartData)}
                   />
                 </Chart>
 
@@ -288,7 +304,7 @@ export default function Predictor() {
                 <Typography variant="h5" align="left">
                   Probabilities
                 </Typography>
-                <Chart data={probabilityData} rotated>
+                <Chart data={chartData} rotated>
                   <ValueScale name="probability" modifyDomain={adjustDomain} />
                   <ArgumentAxis />
                   <ValueAxis
