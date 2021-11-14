@@ -17,10 +17,11 @@ import {
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { PhotoCamera } from "@material-ui/icons";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import React, { ChangeEvent, useState } from "react";
 import "./App.css";
 import Copyright from "./Copyright";
+import { API_DOMAIN } from "./env";
 import "./index.css";
 
 interface Dictionary<T> {
@@ -210,7 +211,7 @@ export default function Predictor() {
 
       axios
         .post<IPredictResponse>(
-          `http://localhost:8000/predict/InceptionResNetV2-imagenet`,
+          `${window.location.protocol}//${API_DOMAIN}/predict/InceptionResNetV2-imagenet`,
           formData,
           { headers: { "content-Type": "multipart/form-data" } }
         )
@@ -225,7 +226,7 @@ export default function Predictor() {
           }
           setChartData(probs);
         })
-        .catch((error) => console.error(error));
+        .catch((error: AxiosError) => console.error(error));
     }
   };
 
