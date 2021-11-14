@@ -7,10 +7,20 @@ import {
   PieSeries,
   ValueAxis,
 } from "@devexpress/dx-react-chart-material-ui";
-import { Box, Button, Typography } from "@material-ui/core";
+import {
+  Box,
+  Button,
+  Container,
+  Grid,
+  Paper,
+  Typography,
+} from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
+import { PhotoCamera } from "@material-ui/icons";
 import axios from "axios";
 import React, { ChangeEvent, useState } from "react";
 import "./App.css";
+import Copyright from "./Copyright";
 import "./index.css";
 
 interface IPredictResponse {
@@ -107,9 +117,55 @@ const PieSeriesLabeledPoint = (data: IDataPoint[]) => {
   };
 };
 
+const useStyles = makeStyles(
+  (theme: {
+    spacing: (
+      arg0: number,
+      arg1?: number | undefined,
+      arg2?: number | undefined
+    ) => number;
+    breakpoints: { up: (arg0: number) => any };
+  }) => ({
+    container: {
+      paddingBottom: theme.spacing(4),
+      [theme.breakpoints.up(600 + theme.spacing(2) * 2)]: {
+        paddingTop: theme.spacing(4),
+      },
+    },
+    paper: {
+      elevation: 6,
+    },
+    outerBox: {
+      // elevation: 6,
+      marginTop: theme.spacing(3),
+      marginBottom: theme.spacing(3),
+      padding: theme.spacing(2),
+      [theme.breakpoints.up(600 + theme.spacing(3) * 2)]: {
+        marginTop: theme.spacing(6),
+        marginBottom: theme.spacing(6),
+        padding: theme.spacing(3),
+      },
+    },
+    button: {
+      marginTop: theme.spacing(3),
+      marginLeft: theme.spacing(1),
+    },
+    content: {
+      flexGrow: 1,
+      overflow: "auto",
+    },
+    stickToBottom: {
+      width: "100%",
+      position: "fixed",
+      bottom: 0,
+    },
+  })
+);
+
 export default function Predictor() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [data, setChartData] = useState<IDataPoint[]>([]);
+  const classes = useStyles();
 
   const changeHandler = (event: ChangeEvent<HTMLInputElement> | null) => {
     if (event?.target?.files) {
@@ -152,7 +208,13 @@ export default function Predictor() {
           accept="image/*"
           onChange={changeHandler}
         />
-        <Button variant="contained" color="primary" component="span">
+        <Button
+          // size="large"
+          variant="contained"
+          color="primary"
+          component="span"
+          startIcon={<PhotoCamera />}
+        >
           Choose Image
         </Button>
       </label>
@@ -188,64 +250,89 @@ export default function Predictor() {
 
     return (
       <div>
-        <Box>{input()}</Box>
-        <Box>
-          <Typography variant="caption">{selectedFile.name}</Typography>
-        </Box>
-        <br />
-        <Box>
-          <img
-            src={URL.createObjectURL(selectedFile)}
-            alt="Source"
-            id="placeholder"
-            height={200}
-          />
-        </Box>
-        <br />
-        <Box className="results-panel">
-          <Typography variant="h5" align="left">
-            Prediction
-          </Typography>
+        <Container className={classes.container}>
+          <Paper className={classes.paper}>
+            <Box className={classes.outerBox} textAlign="center">
+              <Grid alignItems="stretch" direction="column">
+                <Box>{input()}</Box>
+                <Box margin={1}>
+                  <Typography variant="caption">{selectedFile.name}</Typography>
+                </Box>
 
-          <Chart data={predictionData}>
-            <PieSeries
-              valueField="probability"
-              argumentField="name"
-              pointComponent={PieSeriesLabeledPoint(data)}
-            />
-            <Legend
-              position="top"
-              labelComponent={LegendPercentNameLabel(data)}
-            />
-          </Chart>
+                <Box margin={1}>
+                  <img
+                    src={URL.createObjectURL(selectedFile)}
+                    alt="Source"
+                    id="placeholder"
+                    height={200}
+                  />
+                </Box>
 
-          <br />
-          <Typography variant="h5" align="left">
-            Probabilities
-          </Typography>
-          <Chart data={probabilityData} rotated>
-            <ValueScale name="probability" modifyDomain={adjustDomain} />
-            <ArgumentAxis />
-            <ValueAxis
-              scaleName="probability"
-              labelComponent={ValueAxisPercentLabel}
-            />
-            <Stack stacks={[{ series: ["insignificant", "significant"] }]} />
-            <BarSeries
-              valueField="insignificant"
-              argumentField="name"
-              scaleName="probability"
-            />
-            <BarSeries
-              valueField="significant"
-              argumentField="name"
-              scaleName="probability"
-            />
-          </Chart>
-        </Box>
+                <Typography variant="h5" align="left">
+                  Prediction
+                </Typography>
+
+                <Chart data={predictionData}>
+                  <PieSeries
+                    valueField="probability"
+                    argumentField="name"
+                    pointComponent={PieSeriesLabeledPoint(data)}
+                  />
+                  <Legend
+                    position="top"
+                    labelComponent={LegendPercentNameLabel(data)}
+                  />
+                </Chart>
+
+                <br />
+                <Typography variant="h5" align="left">
+                  Probabilities
+                </Typography>
+                <Chart data={probabilityData} rotated>
+                  <ValueScale name="probability" modifyDomain={adjustDomain} />
+                  <ArgumentAxis />
+                  <ValueAxis
+                    scaleName="probability"
+                    labelComponent={ValueAxisPercentLabel}
+                  />
+                  <Stack
+                    stacks={[{ series: ["insignificant", "significant"] }]}
+                  />
+                  <BarSeries
+                    valueField="insignificant"
+                    argumentField="name"
+                    scaleName="probability"
+                  />
+                  <BarSeries
+                    valueField="significant"
+                    argumentField="name"
+                    scaleName="probability"
+                  />
+                </Chart>
+              </Grid>
+            </Box>
+          </Paper>
+        </Container>
+        <Copyright />
       </div>
     );
   } else {
-    return <div>{input()}</div>;
+    return (
+      <div>
+        <Container className={classes.container}>
+          <Box
+            className={classes.outerBox}
+            justifyContent="center"
+            display="flex"
+            alignItems="center"
+          >
+            {input()}
+          </Box>
+        </Container>
+        <Box className={classes.stickToBottom}>
+          <Copyright />
+        </Box>
+      </div>
+    );
   }
 }
