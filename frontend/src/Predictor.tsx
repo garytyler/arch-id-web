@@ -68,7 +68,6 @@ const createChartData = (data: IDataPoint[]): IChartDataPoint[] => {
   for (let i in data) {
     const margin = (data[i].percent - minPercent) / signifTotal;
     const percentMargin = margin * 100;
-
     if (data[i].percent > minPercent + 0.1) {
       result[i] = {
         ...data[i],
@@ -78,7 +77,7 @@ const createChartData = (data: IDataPoint[]): IChartDataPoint[] => {
           color: colors[colorIndex],
         },
       };
-      colorIndex++;
+      colorIndex < colors.length ? colorIndex++ : (colorIndex = 0);
     } else {
       result[i] = {
         ...data[i],
