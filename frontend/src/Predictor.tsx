@@ -1,4 +1,4 @@
-import { Stack, ValueScale } from "@devexpress/dx-react-chart";
+import { Animation, Stack, ValueScale } from "@devexpress/dx-react-chart";
 import {
   ArgumentAxis,
   BarSeries,
@@ -12,10 +12,11 @@ import {
   Button,
   Container,
   Grid,
+  Link,
+  makeStyles,
   Paper,
   Typography,
 } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
 import { PhotoCamera } from "@material-ui/icons";
 import axios, { AxiosError } from "axios";
 import React, { ChangeEvent, useState } from "react";
@@ -26,12 +27,6 @@ import "./index.css";
 
 interface Dictionary<T> {
   [key: string]: T;
-}
-
-interface IPredictResponse {
-  names: string[];
-  predictions: number[];
-  probabilities: number[];
 }
 
 interface IPredictResponseItem {
@@ -47,76 +42,151 @@ interface IDataPoint extends IPredictResponseItem {
 }
 
 interface IChartDataPoint extends IDataPoint {
-  significant: number;
-  insignificant: number;
-  significantMargin: number;
-  insignificantMargin: number;
+  probabilityMargin: number;
+  percentMargin: number;
+  color: string;
 }
 
 const createChartData = (data: IDataPoint[]): IChartDataPoint[] => {
+  let colorIndex = 0;
+  const colors = [
+    "#42A5F5",
+    "#FF7043",
+    "#9CCC65",
+    "#FFCA28",
+    "#26A69A",
+    "#EC407A",
+  ];
   const percents = Object.values(data).map((i) => i.percent);
   const minPercent = Math.min(...percents);
+
   const signifTotal = percents
     .filter((i) => i > minPercent)
     .map((i) => i - minPercent)
     .reduce((a, b) => a + b);
   const result: IChartDataPoint[] = [];
   for (let i in data) {
-    const percentMargin = ((data[i].percent - minPercent) / signifTotal) * 100;
+    const margin = (data[i].percent - minPercent) / signifTotal;
+    const percentMargin = margin * 100;
+
     if (data[i].percent > minPercent + 0.1) {
       result[i] = {
         ...data[i],
         ...{
-          significant: data[i].percent,
-          insignificant: 0,
-          significantMargin: percentMargin,
-          insignificantMargin: 0,
+          probabilityMargin: margin,
+          percentMargin: percentMargin,
+          color: colors[colorIndex],
         },
       };
+      colorIndex++;
     } else {
       result[i] = {
         ...data[i],
         ...{
-          significant: 0,
-          insignificant: data[i].percent,
-          significantMargin: 0,
-          insignificantMargin: percentMargin,
+          probabilityMargin: 0,
+          percentMargin: 0,
+          color: "#888888",
         },
       };
     }
   }
-  return result;
+  return result.sort((a: IChartDataPoint, b: IChartDataPoint) =>
+    a.displayName > b.displayName ? -1 : 1
+  );
+};
+
+export interface MarkerProps {
+  // From: https://github.com/DevExpress/devextreme-reactive/blob/11e41e0a763477fdee164539f11bcb4e23c86e80/packages/dx-react-chart/src/types/plugins.legend.types.ts#L24
+  color?: string;
+  name?: string;
+  [key: string]: unknown;
+}
+
+export class Marker extends React.PureComponent<MarkerProps> {
+  render() {
+    const { color, ...restProps } = this.props;
+    return (
+      <svg fill={color} width="10" height="10" {...restProps}>
+        <circle r={5} cx={5} cy={5} {...restProps} />
+      </svg>
+    );
+  }
+}
+
+const LegendColorCodedMarker = (data: IChartDataPoint[]) => {
+  const dataByDisplayName = chartDataToDictionary(data);
+  return (props: MarkerProps) => {
+    if (props.name === undefined) {
+      return <Legend.Marker {...props} />;
+    } else {
+      return (
+        <Legend.Marker {...props} color={dataByDisplayName[props.name].color} />
+      );
+    }
+  };
 };
 
 const LegendPercentLabel = (data: IChartDataPoint[]) => {
-  const valuesByName: Dictionary<number> = {};
-  for (let i in data) {
-    const name: string = data[i].name;
-    valuesByName[name] = data[i].significantMargin;
-  }
+  const dataByDisplayName = chartDataToDictionary(data);
+
   return (props: Legend.LabelProps) => {
     return (
-      <Legend.Label
-        {...props}
-        text={
-          props.text +
-          " (" +
-          valuesByName[props.text.toString()].toFixed(1).toString() +
-          "%)"
-        }
-      />
+      <div>
+        <Box marginLeft={1} component="span">
+          <Typography color="textPrimary" component="span">
+            <b>
+              {" "}
+              {" " +
+                dataByDisplayName[props.text.toString()].percentMargin
+                  .toFixed(1)
+                  .toString() +
+                "% "}
+            </b>
+            {props.text}
+          </Typography>
+        </Box>
+
+        <Box marginLeft={1} component="span">
+          <Link
+            href={dataByDisplayName[props.text.toString()].wikipediaUrl}
+            target="_blank"
+            variant="inherit"
+          >
+            <Button
+              variant="text"
+              color="primary"
+              component="span"
+              size="small"
+            >
+              Learn More
+            </Button>
+          </Link>
+        </Box>
+      </div>
     );
   };
 };
 
-const ValueAxisSymbolLabel =
-  (symbol: string) => (props: ValueAxis.LabelProps) => {
-    return <ValueAxis.Label {...props} text={props.text + symbol} />;
+const ArgumentAxisLinkLabel = (data: IChartDataPoint[]) => {
+  return (props: ArgumentAxis.LabelProps) => {
+    return <ArgumentAxis.Label {...props} text={props.text} />;
   };
+};
 
-const ValueAxisPercentLabel = ValueAxisSymbolLabel("%");
+const ValueAxisPercentLabel = (props: ValueAxis.LabelProps) => {
+  return <ValueAxis.Label {...props} text={props.text + "%"} />;
+};
+
+const chartDataToDictionary = (data: IChartDataPoint[]) => {
+  const result: Dictionary<IChartDataPoint> = {};
+  for (let i in data) {
+    result[data[i].displayName] = data[i];
+  }
+  return result;
+};
 
 const PieSeriesLabeledPoint = (data: IChartDataPoint[]) => {
+  const dataByDisplayName = chartDataToDictionary(data);
   const getCoordinates = (
     startAngle: number,
     endAngle: number,
@@ -130,27 +200,50 @@ const PieSeriesLabeledPoint = (data: IChartDataPoint[]) => {
     };
   };
 
-  const valuesByName: Dictionary<number> = {};
-  for (let i in data) {
-    const name: string = data[i].name;
-    valuesByName[name] = data[i].significantMargin;
-  }
-
   return (props: PieSeries.PointProps) => {
     const { startAngle, endAngle, maxRadius, arg, val } = props;
 
     const { x, y } = getCoordinates(startAngle, endAngle, maxRadius * 0.8);
-
     return (
       <React.Fragment>
-        <PieSeries.Point {...props} />
+        <PieSeries.Point
+          {...props}
+          color={dataByDisplayName[props.argument].color}
+        />
         <Chart.Label
           x={arg + x}
           y={val - y}
           dominantBaseline="middle"
           textAnchor="middle"
         >
-          {valuesByName[props.argument].toFixed(1).toString() + "%"}
+          {dataByDisplayName[props.argument].percentMargin
+            .toFixed(1)
+            .toString() + "%"}
+        </Chart.Label>
+      </React.Fragment>
+    );
+  };
+};
+
+const BarSeriesColorCodedPoint = (data: IChartDataPoint[]) => {
+  const dataByDisplayName = chartDataToDictionary(data);
+
+  return (props: BarSeries.PointProps) => {
+    const { arg, val } = props;
+    return (
+      <React.Fragment>
+        <BarSeries.Point
+          {...{ ...props, color: dataByDisplayName[props.argument].color }}
+        />
+        <Chart.Label
+          x={val > 30 ? val - 1 : val + 1}
+          y={arg}
+          dominantBaseline="mathematical"
+          textAnchor={val > 30 ? "end" : "start"}
+        >
+          {" " +
+            dataByDisplayName[props.argument].percent.toFixed(1).toString() +
+            "%"}
         </Chart.Label>
       </React.Fragment>
     );
@@ -198,6 +291,13 @@ const useStyles = makeStyles(
       position: "fixed",
       bottom: 0,
     },
+    link: {
+      color: "lightblueblue",
+      textDecoration: "none",
+      "&:hover": {
+        color: "blue",
+      },
+    },
   })
 );
 
@@ -211,7 +311,7 @@ export default function Predictor() {
       const file = event.target.files[0];
       setSelectedFile(file);
 
-      // Create an object of formData
+      // We post the file as formData object
       const formData = new FormData();
       formData.append("files", file);
 
@@ -271,14 +371,24 @@ export default function Predictor() {
     ];
   };
 
+  // // Check if mobile device
+  // const theme: Theme = useTheme();
+  // const isSmallScreen = useMediaQuery(() => {
+  //   return theme.breakpoints.down("xs");
+  // });
+
   if (selectedFile && chartData.length > 0) {
-    const pieChartData = chartData.filter((i) => i.significant > 0);
+    const pieChartData = chartData.filter((i) => i.probabilityMargin > 0);
     return (
       <div>
         <Container className={classes.container}>
           <Paper className={classes.paper}>
             <Box className={classes.outerBox} textAlign="center">
-              <Grid alignItems="stretch" direction="column">
+              <Grid
+                alignItems="flex-start"
+                justifyContent="flex-start"
+                direction="row"
+              >
                 <Box>{input()}</Box>
                 <Box margin={1}>
                   <Typography variant="caption">{selectedFile.name}</Typography>
@@ -298,13 +408,15 @@ export default function Predictor() {
                 </Typography>
 
                 <Chart data={pieChartData}>
+                  <Animation />
                   <PieSeries
-                    valueField="significantMargin"
-                    argumentField="name"
+                    valueField="percentMargin"
+                    argumentField="displayName"
                     pointComponent={PieSeriesLabeledPoint(pieChartData)}
                   />
                   <Legend
                     position="top"
+                    markerComponent={LegendColorCodedMarker(pieChartData)}
                     labelComponent={LegendPercentLabel(pieChartData)}
                   />
                 </Chart>
@@ -314,8 +426,11 @@ export default function Predictor() {
                   Probabilities
                 </Typography>
                 <Chart data={chartData} rotated>
+                  <Animation />
                   <ValueScale name="probability" modifyDomain={adjustDomain} />
-                  <ArgumentAxis />
+                  <ArgumentAxis
+                    labelComponent={ArgumentAxisLinkLabel(chartData)}
+                  />
                   <ValueAxis
                     scaleName="probability"
                     labelComponent={ValueAxisPercentLabel}
@@ -324,14 +439,10 @@ export default function Predictor() {
                     stacks={[{ series: ["insignificant", "significant"] }]}
                   />
                   <BarSeries
-                    valueField="insignificant"
-                    argumentField="name"
+                    valueField="percent"
+                    argumentField="displayName"
                     scaleName="probability"
-                  />
-                  <BarSeries
-                    valueField="significant"
-                    argumentField="name"
-                    scaleName="probability"
+                    pointComponent={BarSeriesColorCodedPoint(chartData)}
                   />
                 </Chart>
               </Grid>

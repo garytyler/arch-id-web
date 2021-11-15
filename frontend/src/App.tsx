@@ -6,12 +6,12 @@ import {
   Toolbar,
   Typography,
 } from "@material-ui/core";
+import { blue, pink } from "@material-ui/core/colors";
 import { createTheme, makeStyles } from "@material-ui/core/styles";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { default as React } from "react";
 import { APP_DESCRIPTION, APP_TITLE } from "./env";
 import Predictor from "./Predictor";
-
 const useStyles = makeStyles(
   (theme: {
     spacing: (
@@ -40,6 +40,8 @@ export default function App() {
       createTheme({
         palette: {
           type: prefersDarkMode ? "dark" : "light",
+          primary: blue,
+          secondary: pink,
         },
       }),
     [prefersDarkMode]
