@@ -1,7 +1,9 @@
 import {
   AppBar,
   Box,
+  Button,
   CssBaseline,
+  Link,
   ThemeProvider,
   Toolbar,
   Typography,
@@ -10,8 +12,9 @@ import { blue, pink } from "@material-ui/core/colors";
 import { createTheme, makeStyles } from "@material-ui/core/styles";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { default as React } from "react";
-import { APP_DESCRIPTION, APP_TITLE } from "./env";
+import { APP_DESCRIPTION, APP_TITLE, TENSORBOARD_URL } from "./env";
 import Predictor from "./Predictor";
+
 const useStyles = makeStyles(
   (theme: {
     spacing: (
@@ -28,6 +31,9 @@ const useStyles = makeStyles(
     content: {
       flexGrow: 1,
       overflow: "auto",
+    },
+    title: {
+      flexGrow: 1,
     },
   })
 );
@@ -55,13 +61,25 @@ export default function App() {
         <CssBaseline />
         <AppBar color="default" position="absolute" className={classes.appBar}>
           <Toolbar>
-            <Box>
+            <Box className={classes.title}>
               <Typography variant="h6" color="inherit" noWrap>
                 {APP_TITLE}
               </Typography>
               <Typography variant="subtitle2" color="textSecondary">
                 {APP_DESCRIPTION}
               </Typography>
+            </Box>
+            <Box marginLeft={1} component="span">
+              <Link href={TENSORBOARD_URL} target="_blank" variant="inherit">
+                <Button
+                  variant="text"
+                  color="primary"
+                  component="span"
+                  size="small"
+                >
+                  Tensorboard
+                </Button>
+              </Link>
             </Box>
           </Toolbar>
         </AppBar>

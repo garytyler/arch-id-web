@@ -41,7 +41,6 @@ async def predict(
             data=json.dumps(
                 {"signature_name": "serving_default", "instances": img_array}
             ),
-            content=img_array,
         )
     predictions: List[float] = predict_response.json()["predictions"][0]
     probabilities: List[float] = tf.nn.softmax(predictions).numpy().tolist()
@@ -55,4 +54,5 @@ async def predict(
                 "probability": probabilities[n],
             }
         )
+
     return results

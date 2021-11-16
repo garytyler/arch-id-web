@@ -10,6 +10,7 @@ import {
 import {
   Box,
   Button,
+  CircularProgress,
   Container,
   Grid,
   Link,
@@ -307,6 +308,8 @@ export default function Predictor() {
 
   const changeHandler = (event: ChangeEvent<HTMLInputElement> | null) => {
     if (event?.target?.files) {
+      setChartData([]);
+
       const file = event.target.files[0];
       setSelectedFile(file);
 
@@ -338,29 +341,17 @@ export default function Predictor() {
     }
   };
 
-  const input = () => {
-    return (
-      <label htmlFor="btn-upload">
-        <input
-          id="btn-upload"
-          name="btn-upload"
-          style={{ display: "none" }}
-          type="file"
-          accept="image/*"
-          onChange={changeHandler}
-        />
-        <Button
-          // size="large"
-          variant="contained"
-          color="primary"
-          component="span"
-          startIcon={<PhotoCamera />}
-        >
-          Choose Image
-        </Button>
-      </label>
-    );
-  };
+  // const status = () => {
+  //   if (selectedFile) {
+  //     return chartData ? <CircularProgress color="secondary" /> : {};
+  //   } else {
+  //     return (
+  //       <Typography>
+  //         {"Submit an image of a building to predict the architectural style!"}
+  //       </Typography>
+  //     );
+  //   }
+  // };
 
   const adjustDomain = () => {
     const percents = Object.values(chartData).map((i) => i.percent);
@@ -369,25 +360,101 @@ export default function Predictor() {
       Math.ceil(Math.max(...percents)),
     ];
   };
+  // const status = () => {
+  //   if (chartData.length !== 0) {
+  //     return <CircularProgress color="secondary" />;
+  //   } else {
+  //     return (
+  //       <Typography>
+  //         Submit an image of a building to predict the architectural style!
+  //       </Typography>
+  //     );
+  //   }
+  // };
+
+  const input = () => {
+    return (
+      <Grid item style={{ textAlign: "center" }}>
+        <Box marginY={2}>
+          <label htmlFor="btn-upload">
+            <input
+              id="btn-upload"
+              name="btn-upload"
+              style={{ display: "none" }}
+              type="file"
+              accept="image/*"
+              onChange={changeHandler}
+            />
+            <Button
+              // size="large"
+              variant="contained"
+              color="primary"
+              component="span"
+              startIcon={<PhotoCamera />}
+            >
+              Choose Image
+            </Button>
+          </label>
+        </Box>
+        {/* <Box height="3rem">{status()}</Box> */}
+      </Grid>
+    );
+  };
+
+  // const hasChartData = () => {
+  //   return Boolean();
+  // };
 
   // // Check if mobile device
   // const theme: Theme = useTheme();
   // const isSmallScreen = useMediaQuery(() => {
   //   return theme.breakpoints.down("xs");
   // });
-
-  if (selectedFile && chartData.length > 0) {
+  // const body = () => {
+  if (!selectedFile) {
+    return (
+      <div>
+        <Container className={classes.container}>
+          <Box
+            className={classes.outerBox}
+            // justifyContent="center"
+            // display="flex"
+            // alignItems="center"
+            textAlign="center"
+          >
+            {input()}
+            <Typography>
+              Submit an image of a building to predict the architectural style!
+            </Typography>
+          </Box>
+        </Container>
+        <Box className={classes.stickToBottom}>
+          <Copyright />
+        </Box>
+      </div>
+    );
+  } else if (chartData.length === 0) {
+    return (
+      <div>
+        <Container className={classes.container}>
+          <Box className={classes.outerBox} textAlign="center">
+            {input()}
+            <CircularProgress color="secondary" />
+          </Box>
+        </Container>
+        <Box className={classes.stickToBottom}>
+          <Copyright />
+        </Box>
+      </div>
+    );
+  } else {
     const pieChartData = chartData.filter((i) => i.probabilityMargin > 0);
     return (
       <div>
         <Container className={classes.container}>
           <Paper className={classes.paper}>
             <Box className={classes.outerBox} textAlign="center">
-              <Grid
-                alignItems="flex-start"
-                justifyContent="flex-start"
-                direction="row"
-              >
+              <Grid justifyContent="flex-start">
                 <Box>{input()}</Box>
                 <Box margin={1}>
                   <Typography variant="caption">{selectedFile.name}</Typography>
@@ -451,23 +518,25 @@ export default function Predictor() {
         <Copyright />
       </div>
     );
-  } else {
-    return (
-      <div>
-        <Container className={classes.container}>
-          <Box
-            className={classes.outerBox}
-            justifyContent="center"
-            display="flex"
-            alignItems="center"
-          >
-            {input()}
-          </Box>
-        </Container>
-        <Box className={classes.stickToBottom}>
-          <Copyright />
-        </Box>
-      </div>
-    );
   }
+  // };
+
+  // return (
+  //   <div>
+  //     <Container className={classes.container}>
+  //       <Box
+  //         className={classes.outerBox}
+  //         // justifyContent="center"
+  //         // display="flex"
+  //         // alignItems="center"
+  //         textAlign="center"
+  //       >
+  //         {body()}
+  //       </Box>
+  //     </Container>
+  //     <Box className={classes.stickToBottom}>
+  //       <Copyright />
+  //     </Box>
+  //   </div>
+  // );
 }

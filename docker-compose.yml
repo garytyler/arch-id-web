@@ -3,10 +3,11 @@ x-environment:
   API_DOMAIN: &api-domain ""
   APP_DOMAIN: &app-domain ""
   APP_TITLE: &app-title "Architecture Identifier"
-  APP_DESCRIPTION: &app-description "Identify architectural style using machine learning"
-  APP_GITHUB_URL: &app-github-url ""
+  APP_DESCRIPTION: &app-description "Identify architectural style with machine learning"
+  APP_GITHUB_URL: &app-github-url "https://github.com/garytyler/arch-id-web"
   APP_AUTHOR_NAME: &author-name "Gary Tyler"
   APP_AUTHOR_URL: &author-url "https://github.com/garytyler"
+  TENSORBOARD_URL: &tensorboard-url "https://github.com/garytyler/arch-id-web"
 
 services:
   frontend:
@@ -22,6 +23,7 @@ services:
       REACT_APP_APP_GITHUB_URL: *app-github-url
       REACT_APP_AUTHOR_NAME: *author-name
       REACT_APP_AUTHOR_URL: *author-url
+      REACT_APP_TENSORBOARD_URL: *tensorboard-url
     ports:
       - 3000:3000
 
