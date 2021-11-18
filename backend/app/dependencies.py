@@ -1,6 +1,7 @@
 import httpx
+from fastapi import Depends
 
-from .settings import BASE_CNNS, BaseCNN
+from .settings import Settings, get_settings
 
 
 async def get_metadata(model_name):
@@ -8,8 +9,11 @@ async def get_metadata(model_name):
     return r.json()
 
 
-async def base_cnn(model_name):
-    return BASE_CNNS[model_name.split("-")[0]]
+async def base_cnn(
+    model_name,
+    settings: Settings = Depends(get_settings),
+):
+    return settings.base_cnns[model_name.split("-")[0]]
 
 
 async def input_shape(model_name):

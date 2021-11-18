@@ -7,9 +7,9 @@ import tensorflow as tf
 from fastapi import APIRouter, Depends, File
 from PIL import Image
 
-from .dependencies import base_cnn, input_shape
+from .dependencies import base_cnn, get_settings, input_shape
 from .models import BaseModelOut
-from .settings import CLASSES, BaseCNN
+from .settings import BaseCNN, Settings
 
 api_router = APIRouter(prefix="/api")
 
@@ -28,6 +28,7 @@ async def predict(
     base_cnn: BaseCNN = Depends(base_cnn),
     files: List[bytes] = File(...),
     input_shape: Tuple[int, int, int, int] = Depends(input_shape),
+    settings: Settings = Depends(get_settings),
 ):
     img = Image.open(BytesIO(files[0]))
     img_array = tf.keras.preprocessing.image.img_to_array(img)
@@ -46,10 +47,10 @@ async def predict(
     probabilities: List[float] = tf.nn.softmax(predictions).numpy().tolist()
 
     results: List[dict] = []
-    for n in range(len(CLASSES)):
+    for n in range(len(settings.classes)):
         results.append(
             {
-                **CLASSES[n],
+                **settings.classes[n],
                 "prediction": predictions[n],
                 "probability": probabilities[n],
             }

@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from humps import camelize, decamelize
 from pydantic import BaseModel
 

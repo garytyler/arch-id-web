@@ -19,5 +19,10 @@ def client(app):
 
 
 @pytest.fixture
+def settings():
+    return Settings()
+
+
+@pytest.fixture
 def sample_image_path():
     return Path(__file__).parent / "assets" / "sample.jpg"
