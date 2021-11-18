@@ -12,7 +12,11 @@ import { blue, pink } from "@material-ui/core/colors";
 import { createTheme, makeStyles } from "@material-ui/core/styles";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { default as React } from "react";
-import { APP_DESCRIPTION, APP_TITLE, TENSORBOARD_URL } from "./env";
+import {
+  PROJECT_DESCRIPTION,
+  PROJECT_TITLE,
+  TENSORBOARD_URL,
+} from "./environment";
 import Predictor from "./Predictor";
 
 const useStyles = makeStyles(
@@ -63,10 +67,10 @@ export default function App() {
           <Toolbar>
             <Box className={classes.title}>
               <Typography variant="h6" color="inherit" noWrap>
-                {APP_TITLE}
+                {PROJECT_TITLE}
               </Typography>
               <Typography variant="subtitle2" color="textSecondary">
-                {APP_DESCRIPTION}
+                {PROJECT_DESCRIPTION}
               </Typography>
             </Box>
             <Box marginLeft={1} component="span">

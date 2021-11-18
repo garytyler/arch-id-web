@@ -23,7 +23,7 @@ import axios, { AxiosError } from "axios";
 import React, { ChangeEvent, useState } from "react";
 import "./App.css";
 import Copyright from "./Copyright";
-import { API_DOMAIN } from "./env";
+import { API_DOMAIN } from "./environment";
 import "./index.css";
 
 interface Dictionary<T> {
@@ -341,18 +341,6 @@ export default function Predictor() {
     }
   };
 
-  // const status = () => {
-  //   if (selectedFile) {
-  //     return chartData ? <CircularProgress color="secondary" /> : {};
-  //   } else {
-  //     return (
-  //       <Typography>
-  //         {"Submit an image of a building to predict the architectural style!"}
-  //       </Typography>
-  //     );
-  //   }
-  // };
-
   const adjustDomain = () => {
     const percents = Object.values(chartData).map((i) => i.percent);
     return [
@@ -360,17 +348,6 @@ export default function Predictor() {
       Math.ceil(Math.max(...percents)),
     ];
   };
-  // const status = () => {
-  //   if (chartData.length !== 0) {
-  //     return <CircularProgress color="secondary" />;
-  //   } else {
-  //     return (
-  //       <Typography>
-  //         Submit an image of a building to predict the architectural style!
-  //       </Typography>
-  //     );
-  //   }
-  // };
 
   const input = () => {
     return (

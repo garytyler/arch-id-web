@@ -1,6 +1,6 @@
 import { Box, Link, Typography } from "@material-ui/core";
 import "./App.css";
-import { AUTHOR_NAME, AUTHOR_URL } from "./env";
+import { AUTHOR_NAME, AUTHOR_URL } from "./environment";
 import "./index.css";
 
 export default function Copyright() {

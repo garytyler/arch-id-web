@@ -14,7 +14,7 @@ class _BaseSettings(pydantic.BaseSettings):
 
 
 class Settings(_BaseSettings):
-    APP_TITLE: str
+    PROJECT_TITLE: str
     ALLOWED_HOSTS: str
     CORS_ORIGINS: str
 

@@ -2,20 +2,20 @@ FROM node:16 AS base
 
 WORKDIR /srv/frontend
 
-COPY package*.json ./
-
-FROM base AS development
-
-ENV NODE_ENV='development'
+COPY package*.json yarn.lock ./
 
 RUN yarn install
 
 COPY . .
 
-CMD yarn start
+FROM base AS development
 
-FROM base AS production
+# Empty
 
-ENV NODE_ENV='production'
+FROM base AS build
 
-RUN yarn install
+RUN yarn run build
+
+FROM amazon/aws-cli as production
+
+COPY --from=build /srv/frontend/build/ /aws/

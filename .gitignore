@@ -8,3 +8,4 @@
 !/config/
 !/config/models.dev.config
 !/config/models.prod.config
+!/.env

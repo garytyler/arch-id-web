@@ -1,36 +1,26 @@
-x-environment:
-  &shared-environment # Pass to build environments and containers for all services
-  API_DOMAIN: &api-domain ""
-  APP_DOMAIN: &app-domain ""
-  APP_TITLE: &app-title "Architecture Identifier"
-  APP_DESCRIPTION: &app-description "Identify architectural style with machine learning"
-  APP_GITHUB_URL: &app-github-url "https://github.com/garytyler/arch-id-web"
-  APP_AUTHOR_NAME: &author-name "Gary Tyler"
-  APP_AUTHOR_URL: &author-url "https://github.com/garytyler"
-  TENSORBOARD_URL: &tensorboard-url "https://github.com/garytyler/arch-id-web"
-
 services:
   frontend:
     container_name: frontend
     build:
       context: ./frontend
       target: production
+    command: s3 cp --recursive /aws s3://${FRONTEND_S3_BUCKET_NAME}/
     environment:
-      REACT_APP_API_DOMAIN: *api-domain
-      REACT_APP_APP_DOMAIN: *app-domain
-      REACT_APP_APP_TITLE: *app-title
-      REACT_APP_APP_DESCRIPTION: *app-description
-      REACT_APP_APP_GITHUB_URL: *app-github-url
-      REACT_APP_AUTHOR_NAME: *author-name
-      REACT_APP_AUTHOR_URL: *author-url
-      REACT_APP_TENSORBOARD_URL: *tensorboard-url
-    ports:
-      - 3000:3000
+      - NODE_ENV="production"
+      - REACT_APP_API_DOMAIN=${API_DOMAIN}
+      - REACT_APP_SITE_DOMAIN=${SITE_DOMAIN}
+      - REACT_APP_PROJECT_TITLE=${PROJECT_TITLE}
+      - REACT_APP_PROJECT_DESCRIPTION=${PROJECT_DESCRIPTION}
+      - REACT_APP_PROJECT_GITHUB_URL=${PROJECT_GITHUB_URL}
+      - REACT_APP_AUTHOR_NAME=${AUTHOR_NAME}
+      - REACT_AUTHOR_URL=${AUTHOR_URL}
+      - REACT_APP_TENSORBOARD_URL=${TENSORBOARD_URL}
+      - AWS_ACCESS_KEY_ID=${FRONTEND_AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${FRONTEND_AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${FRONTEND_AWS_DEFAULT_REGION}
 
   backend:
     container_name: backend
-    environment:
-      POETRY_VERSION: 1.1.11
     build:
       context: ./backend
       target: production
@@ -44,7 +34,12 @@ services:
         "app.main:app",
       ]
     ports:
-      - 8000:8000
+      - 80:8000
+    environment:
+      - POETRY_VERSION=1.1.11
+      - BACKEND_PROJECT_TITLE=${PROJECT_TITLE}
+      - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}
+      - BACKEND_ALLOWED_HOSTS=${BACKEND_ALLOWED_HOSTS}
     links:
       - models
     volumes:
@@ -60,12 +55,9 @@ services:
       - --model_config_file_poll_wait_seconds=300
       - --rest_api_timeout_in_ms=30000
     environment:
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_REGION=${AWS_REGION}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - S3_ENDPOINT=${S3_ENDPOINT}
+      - AWS_ACCESS_KEY_ID=${MODELS_AWS_ACCESS_KEY_ID}
+      - AWS_REGION=${MODELS_AWS_REGION}
+      - AWS_SECRET_ACCESS_KEY=${MODELS_AWS_SECRET_ACCESS_KEY}
+      - S3_ENDPOINT=${MODELS_S3_ENDPOINT}
     volumes:
       - ./config:/config
-
-volumes:
-  postgres_data: null

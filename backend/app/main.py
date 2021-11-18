@@ -7,7 +7,7 @@ from .settings import get_settings
 
 
 def get_app():
-    app = FastAPI(title=get_settings().APP_TITLE)
+    app = FastAPI()
     app.include_router(api_router)
     app.add_middleware(
         TrustedHostMiddleware, allowed_hosts=get_settings().ALLOWED_HOSTS

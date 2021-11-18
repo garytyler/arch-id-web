@@ -62,7 +62,5 @@
       "last 1 safari version"
     ]
   },
-  "devDependencies": {
-    "@types/react-vis": "^1.11.10"
-  }
+  "devDependencies": {}
 }

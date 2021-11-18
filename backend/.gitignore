@@ -11,3 +11,4 @@
 !/Dockerfile
 !/pyproject.toml
 !/poetry.lock
+!/gunicorn_conf.py
