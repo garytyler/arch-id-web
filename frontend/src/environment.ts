@@ -9,10 +9,10 @@
 
 export const PREDICT_API_URL =
   process.env.NODE_ENV === "production"
-    ? "https://api.architectureid.app"
+    ? "https://api.architectureid.ai"
     : "http://localhost:8000";
 
-export const SITE_DOMAIN = "architectureid.app";
+export const SITE_DOMAIN = "architectureid.ai";
 export const PROJECT_GITHUB_URL = "https://github.com/garytyler/arch-id-web";
 export const AUTHOR_NAME = "Gary Tyler";
 export const AUTHOR_URL = "https://github.com/garytyler";

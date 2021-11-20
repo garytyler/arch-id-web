@@ -32,8 +32,19 @@ const useStyles = makeStyles((theme: Theme) =>
       flexGrow: 1,
       overflow: "auto",
     },
-    title: {
+    titleBox: {
+      marginTop: "1em",
       flexGrow: 1,
+    },
+    title: {
+      fontSize: "1.5em",
+      fontWeight: 900,
+      lineHeight: 0,
+    },
+    subTitle: {
+      // fontSize: "1.5em",
+      // fontWeight: 900,
+      // lineHeight: 0,
     },
     iconButton: {
       padding: 10,
@@ -67,28 +78,44 @@ export default function App() {
         <CssBaseline />
         <AppBar color="default" position="absolute" className={classes.appBar}>
           <Toolbar>
-            <Box className={classes.title}>
-              <Typography variant="h6" color="inherit" noWrap component="span">
-                <Link
-                  href={`${window.location.protocol}://${window.location.hostname}`}
+            <Box className={classes.titleBox}>
+              <Link
+                href={`${window.location.protocol}://${window.location.hostname}`}
+                color="inherit"
+                style={{ textDecoration: "none" }}
+              >
+                <Typography
                   color="inherit"
-                  style={{ textDecoration: "none" }}
+                  noWrap
+                  component="span"
+                  className={classes.title}
                 >
                   Architecture
-                  <Typography
-                    variant="h6"
-                    color="secondary"
-                    noWrap
-                    component="span"
-                    style={{ fontStyle: "italic" }}
-                  >
-                    ID
-                  </Typography>
+                </Typography>
+                <Typography
+                  color="secondary"
+                  noWrap
+                  component="span"
+                  className={classes.title}
+                >
+                  <i>ID</i>
+                </Typography>
+                <Typography
+                  color="inherit"
+                  noWrap
+                  component="span"
+                  className={classes.title}
+                >
                   .ai
-                </Link>
-              </Typography>
-              <Typography variant="subtitle2" color="textSecondary">
-                Deep learning for architectural style identification
+                </Typography>
+              </Link>
+              <br />
+              <Typography
+                variant="caption"
+                color="textSecondary"
+                className={classes.subTitle}
+              >
+                Identify architectural style with deep learning
               </Typography>
             </Box>
             <Box style={{ display: "flex" }} marginY={0}>

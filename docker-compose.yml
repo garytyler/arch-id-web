@@ -30,7 +30,7 @@ services:
       - BACKEND_PROJECT_TITLE=${PROJECT_TITLE}
       - BACKEND_CORS_ORIGINS='["*"]'
       - BACKEND_ALLOWED_HOSTS='["*"]'
-      - BACKEND_MODELS_SERVER_URL=https://models.architectureid.app
+      - BACKEND_MODELS_SERVER_URL=https://models.architectureid.ai
     links:
       - models
     volumes:
