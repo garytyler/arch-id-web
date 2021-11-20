@@ -12,11 +12,7 @@ import { blue, pink } from "@material-ui/core/colors";
 import { createTheme, makeStyles } from "@material-ui/core/styles";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { default as React } from "react";
-import {
-  PROJECT_DESCRIPTION,
-  PROJECT_TITLE,
-  TENSORBOARD_URL,
-} from "./environment";
+import { TENSORBOARD_URL } from "./environment";
 import Predictor from "./Predictor";
 
 const useStyles = makeStyles(
@@ -66,15 +62,36 @@ export default function App() {
         <AppBar color="default" position="absolute" className={classes.appBar}>
           <Toolbar>
             <Box className={classes.title}>
-              <Typography variant="h6" color="inherit" noWrap>
-                {PROJECT_TITLE}
+              <Typography variant="h6" color="inherit" noWrap component="span">
+                <Link
+                  href={`${window.location.protocol}://${window.location.hostname}`}
+                  color="inherit"
+                  style={{ textDecoration: "none" }}
+                >
+                  Architecture
+                  <Typography
+                    variant="h6"
+                    color="secondary"
+                    noWrap
+                    component="span"
+                    style={{ fontWeight: 900 }}
+                  >
+                    ID
+                  </Typography>
+                  .ai
+                </Link>
               </Typography>
               <Typography variant="subtitle2" color="textSecondary">
-                {PROJECT_DESCRIPTION}
+                Deep learning for architectural style identification
               </Typography>
             </Box>
             <Box marginLeft={1} component="span">
-              <Link href={TENSORBOARD_URL} target="_blank" variant="inherit">
+              <Link
+                href={TENSORBOARD_URL}
+                target="_blank"
+                variant="inherit"
+                rel="noopener"
+              >
                 <Button
                   variant="text"
                   color="primary"

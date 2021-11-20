@@ -4,8 +4,8 @@
 !/backend/
 !.gitignore
 !/docker-compose.yml
-!/docker-compose.override.yml
+!/docker-compose.prod.yml
+!/docker-compose.dev.yml
 !/config/
 !/config/models.dev.config
 !/config/models.prod.config
-!/.env

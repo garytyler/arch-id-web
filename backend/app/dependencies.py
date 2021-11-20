@@ -1,19 +1,18 @@
-import httpx
-from fastapi import Depends
+import aiohttp
 
-from .settings import Settings, get_settings
-
-
-async def get_metadata(model_name):
-    r = httpx.get(f"http://models:8501/v1/models/{model_name}/metadata")
-    return r.json()
+from .settings import get_settings
 
 
-async def base_cnn(
-    model_name,
-    settings: Settings = Depends(get_settings),
-):
-    return settings.base_cnns[model_name.split("-")[0]]
+async def get_metadata(model_name: str):
+    url = f"{get_settings().MODELS_SERVER_URL}/v1/models/{model_name}/metadata"
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            resp_data = await resp.json()
+    return resp_data
+
+
+async def base_cnn(model_name: str):
+    return get_settings().base_cnns[model_name.split("-")[0]]
 
 
 async def input_shape(model_name):

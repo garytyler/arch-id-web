@@ -2,7 +2,7 @@
     "name": "arch-id-frontend",
     "dockerComposeFile": [
         "../docker-compose.yml",
-        "../docker-compose.override.yml"
+        "../docker-compose.dev.yml"
     ],
     "service": "frontend",
     "workspaceFolder": "/srv/frontend",

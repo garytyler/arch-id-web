@@ -2,7 +2,7 @@
     "name": "arch-id-backend",
     "dockerComposeFile": [
         "../docker-compose.yml",
-        "../docker-compose.override.yml"
+        "../docker-compose.dev.yml"
     ],
     "service": "backend",
     "workspaceFolder": "/srv/backend",

@@ -19,26 +19,33 @@ import {
   Typography,
 } from "@material-ui/core";
 import { PhotoCamera } from "@material-ui/icons";
-import axios, { AxiosError } from "axios";
-import React, { ChangeEvent, useState } from "react";
+import { ChangeEvent, default as React, useState } from "react";
 import "./App.css";
 import Copyright from "./Copyright";
-import { API_DOMAIN } from "./environment";
+import { PREDICT_API_URL } from "./environment";
 import "./index.css";
+import { imageToArray, softmax } from "./utils";
 
 interface Dictionary<T> {
   [key: string]: T;
 }
 
-interface IPredictResponseItem {
-  prediction: number;
-  probability: number;
+interface IModelsApiResponse {
+  predictions: number[][];
+}
+
+interface IClassItemItem {
   name: string;
   displayName: string;
   wikipediaUrl: string;
 }
 
-interface IDataPoint extends IPredictResponseItem {
+interface IPredictApiResponseItem extends IClassItemItem {
+  prediction: number;
+  probability: number;
+}
+
+interface IDataPoint extends IPredictApiResponseItem {
   percent: number;
 }
 
@@ -47,6 +54,135 @@ interface IChartDataPoint extends IDataPoint {
   percentMargin: number;
   color: string;
 }
+
+const CLASSES: IClassItemItem[] = [
+  {
+    name: "Achaemenid architecture",
+    displayName: "Achaemenid",
+    wikipediaUrl: "https://en.wikipedia.org/wiki/Achaemenid_architecture",
+  },
+  {
+    name: "American craftsman style",
+    displayName: "American Craftsman",
+    wikipediaUrl: "https://en.wikipedia.org/wiki/American_Craftsman",
+  },
+  {
+    name: "American Foursquare architecture",
+    displayName: "American Foursquare",
+    wikipediaUrl: "https://en.wikipedia.org/wiki/American_Foursquare",
+  },
+  {
+    name: "Ancient Egyptian architecture",
+    displayName: "Ancient Egyptian",
+    wikipediaUrl: "https://en.wikipedia.org/wiki/Ancient_Egyptian_architecture",
+  },
+  {
+    name: "Art Deco architecture",
+    displayName: "Art Deco",
+    wikipediaUrl: "https://en.wikipedia.org/wiki/Art_Deco",
+  },
+  {
+    name: "Art Nouveau architecture",
+    displayName: "Art Nouveau",
+    wikipediaUrl: "https://en.wikipedia.org/wiki/Art_Nouveau",
+  },
+  {
+    name: "Baroque architecture",
+    displayName: "Baroque",
+    wikipediaUrl: "https://en.wikipedia.org/wiki/Baroque_architecture",
+  },
+  {
+    name: "Bauhaus architecture",
+    displayName: "Bauhaus",
+    wikipediaUrl: "https://en.wikipedia.org/wiki/Bauhaus",
+  },
+  {
+    name: "Beaux-Arts architecture",
+    displayName: "Beaux-Arts",
+    wikipediaUrl: "https://en.wikipedia.org/wiki/Beaux-Arts_architecture",
+  },
+  {
+    name: "Byzantine architecture",
+    displayName: "Byzantine",
+    wikipediaUrl: "https://en.wikipedia.org/wiki/Byzantine_architecture",
+  },
+  {
+    name: "Chicago school architecture",
+    displayName: "Chicago school",
+    wikipediaUrl: "https://en.wikipedia.org/wiki/Chicago_school_(architecture)",
+  },
+  {
+    name: "Colonial architecture",
+    displayName: "Colonial",
+    wikipediaUrl: "https://en.wikipedia.org/wiki/Colonial_architecture",
+  },
+  {
+    name: "Deconstructivism",
+    displayName: "Deconstructivism",
+    wikipediaUrl: "https://en.wikipedia.org/wiki/Deconstructivism",
+  },
+  {
+    name: "Edwardian architecture",
+    displayName: "Edwardian",
+    wikipediaUrl: "https://en.wikipedia.org/wiki/Edwardian_architecture",
+  },
+  {
+    name: "Georgian architecture",
+    displayName: "Georgian",
+    wikipediaUrl: "https://en.wikipedia.org/wiki/Georgian_architecture",
+  },
+  {
+    name: "Gothic architecture",
+    displayName: "Gothic",
+    wikipediaUrl: "https://en.wikipedia.org/wiki/Gothic_architecture",
+  },
+  {
+    name: "Greek Revival architecture",
+    displayName: "Greek Revival",
+    wikipediaUrl: "https://en.wikipedia.org/wiki/Greek_Revival_architecture",
+  },
+  {
+    name: "International style",
+    displayName: "International Style",
+    wikipediaUrl:
+      "https://en.wikipedia.org/wiki/International_Style_(architecture)",
+  },
+  {
+    name: "Novelty architecture",
+    displayName: "Novelty",
+    wikipediaUrl: "https://en.wikipedia.org/wiki/Novelty_architecture",
+  },
+  {
+    name: "Palladian architecture",
+    displayName: "Palladian",
+    wikipediaUrl: "https://en.wikipedia.org/wiki/Palladian_architecture",
+  },
+  {
+    name: "Postmodern architecture",
+    displayName: "Postmodern",
+    wikipediaUrl: "https://en.wikipedia.org/wiki/Postmodern_architecture",
+  },
+  {
+    name: "Queen Anne architecture",
+    displayName: "Queen Anne",
+    wikipediaUrl: "https://en.wikipedia.org/wiki/Queen_Anne_style_architecture",
+  },
+  {
+    name: "Romanesque architecture",
+    displayName: "Romanesque",
+    wikipediaUrl: "https://en.wikipedia.org/wiki/Romanesque_architecture",
+  },
+  {
+    name: "Russian Revival architecture",
+    displayName: "Russian Revival",
+    wikipediaUrl: "https://en.wikipedia.org/wiki/Russian_Revival_architecture",
+  },
+  {
+    name: "Tudor Revival architecture",
+    displayName: "Tudor Revival",
+    wikipediaUrl: "https://en.wikipedia.org/wiki/Tudor_Revival_architecture",
+  },
+];
 
 const createChartData = (data: IDataPoint[]): IChartDataPoint[] => {
   let colorIndex = 0;
@@ -309,38 +445,85 @@ export default function Predictor() {
   const changeHandler = (event: ChangeEvent<HTMLInputElement> | null) => {
     if (event?.target?.files) {
       setChartData([]);
+      loadChartDataFromPredictApi(event);
+    }
+  };
 
+  const loadChartDataFromPredictApi = (
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
+    if (event?.target?.files) {
       const file = event.target.files[0];
       setSelectedFile(file);
-
       // We post the file as formData object
       const formData = new FormData();
       formData.append("files", file);
-
-      axios
-        .post<IPredictResponseItem[]>(
-          `${window.location.protocol}//${API_DOMAIN}/api/predict/InceptionResNetV2-imagenet`,
-          formData,
-          { headers: { "content-Type": "multipart/form-data" } }
-        )
+      const url = `${PREDICT_API_URL}/api/predict/InceptionResNetV2-imagenet`;
+      fetch(url, {
+        method: "POST",
+        body: formData,
+        mode: "cors",
+      })
+        .then((res) => res.json())
         .then((response) => {
           const data: IDataPoint[] = [];
-          for (let i = 0; i < response.data.length; i++) {
+          for (let i = 0; i < response.length; i++) {
             data.push({
-              prediction: response.data[i].prediction,
-              probability: response.data[i].probability,
-              name: response.data[i].name,
-              displayName: response.data[i].displayName,
-              wikipediaUrl: response.data[i].wikipediaUrl,
-              percent: response.data[i].probability * 100,
+              prediction: response[i].prediction,
+              probability: response[i].probability,
+              name: response[i].response,
+              displayName: response[i].displayName,
+              wikipediaUrl: response[i].wikipediaUrl,
+              percent: response[i].probability * 100,
             });
           }
           setChartData(createChartData(data));
         })
-        .catch((error: AxiosError) => console.error(error));
+        .catch((error) => console.error(error));
     }
   };
 
+  const loadChartDataFromModelsApi = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event?.target?.files) {
+      const image = new Image();
+      image.src = URL.createObjectURL(event.target.files[0]);
+      image.onload = () => {
+        let imageArray = imageToArray(image, 299, 299);
+        if (imageArray === null) return;
+        let expImageArray = [imageArray];
+        const url = `${PREDICT_API_URL}/v1/models/InceptionResNetV2-imagenet:predict`;
+        // const url = `http://api.architectureid.app/v1/models/InceptionResNetV2-imagenet:predict`;
+        fetch(url, {
+          method: "POST",
+          headers: {
+            "mode": "cors",
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            signature_name: "serving_default",
+            instances: expImageArray,
+          }),
+        })
+          .then((res) => res.json())
+          .then((res: IModelsApiResponse) => {
+            const predictions = res["predictions"][0];
+            const probabilities = softmax(res["predictions"][0]);
+            const data: IDataPoint[] = [];
+            for (let i = 0; i < predictions.length; i++) {
+              data.push({
+                ...CLASSES[i],
+                prediction: predictions[i],
+                probability: probabilities[i],
+                percent: probabilities[i] * 100,
+              });
+            }
+            setChartData(createChartData(data));
+          })
+          .catch((err) => console.error(err));
+      };
+    }
+  };
   const adjustDomain = () => {
     const percents = Object.values(chartData).map((i) => i.percent);
     return [
@@ -378,10 +561,6 @@ export default function Predictor() {
     );
   };
 
-  // const hasChartData = () => {
-  //   return Boolean();
-  // };
-
   // // Check if mobile device
   // const theme: Theme = useTheme();
   // const isSmallScreen = useMediaQuery(() => {
@@ -392,13 +571,7 @@ export default function Predictor() {
     return (
       <div>
         <Container className={classes.container}>
-          <Box
-            className={classes.outerBox}
-            // justifyContent="center"
-            // display="flex"
-            // alignItems="center"
-            textAlign="center"
-          >
+          <Box className={classes.outerBox} textAlign="center">
             {input()}
             <Typography>
               Submit an image of a building to predict the architectural style!
@@ -431,64 +604,62 @@ export default function Predictor() {
         <Container className={classes.container}>
           <Paper className={classes.paper}>
             <Box className={classes.outerBox} textAlign="center">
-              <Grid justifyContent="flex-start">
-                <Box>{input()}</Box>
-                <Box margin={1}>
-                  <Typography variant="caption">{selectedFile.name}</Typography>
-                </Box>
+              <Box>{input()}</Box>
+              <Box margin={1}>
+                <Typography variant="caption">{selectedFile.name}</Typography>
+              </Box>
 
-                <Box margin={1}>
-                  <img
-                    src={URL.createObjectURL(selectedFile)}
-                    alt="Source"
-                    id="placeholder"
-                    height={200}
-                  />
-                </Box>
+              <Box margin={1}>
+                <img
+                  src={URL.createObjectURL(selectedFile)}
+                  alt="Source"
+                  id="placeholder"
+                  height={200}
+                />
+              </Box>
 
-                <Typography variant="h5" align="left">
-                  Prediction
-                </Typography>
+              <Typography variant="h5" align="left">
+                Prediction
+              </Typography>
 
-                <Chart data={pieChartData}>
-                  <Animation />
-                  <PieSeries
-                    valueField="percentMargin"
-                    argumentField="displayName"
-                    pointComponent={PieSeriesLabeledPoint(pieChartData)}
-                  />
-                  <Legend
-                    position="top"
-                    markerComponent={LegendColorCodedMarker(pieChartData)}
-                    labelComponent={LegendPercentLabel(pieChartData)}
-                  />
-                </Chart>
+              <Chart data={pieChartData}>
+                <Animation />
+                <PieSeries
+                  valueField="percentMargin"
+                  argumentField="displayName"
+                  pointComponent={PieSeriesLabeledPoint(pieChartData)}
+                />
+                <Legend
+                  position="top"
+                  markerComponent={LegendColorCodedMarker(pieChartData)}
+                  labelComponent={LegendPercentLabel(pieChartData)}
+                />
+              </Chart>
 
-                <br />
-                <Typography variant="h5" align="left">
-                  Probabilities
-                </Typography>
-                <Chart data={chartData} rotated>
-                  <Animation />
-                  <ValueScale name="probability" modifyDomain={adjustDomain} />
-                  <ArgumentAxis
-                    labelComponent={ArgumentAxisLinkLabel(chartData)}
-                  />
-                  <ValueAxis
-                    scaleName="probability"
-                    labelComponent={ValueAxisPercentLabel}
-                  />
-                  <Stack
-                    stacks={[{ series: ["insignificant", "significant"] }]}
-                  />
-                  <BarSeries
-                    valueField="percent"
-                    argumentField="displayName"
-                    scaleName="probability"
-                    pointComponent={BarSeriesColorCodedPoint(chartData)}
-                  />
-                </Chart>
-              </Grid>
+              <br />
+              <Typography variant="h5" align="left">
+                Probabilities
+              </Typography>
+              <Chart data={chartData} rotated>
+                <Animation />
+                <ValueScale name="probability" modifyDomain={adjustDomain} />
+                <ArgumentAxis
+                  labelComponent={ArgumentAxisLinkLabel(chartData)}
+                />
+                <ValueAxis
+                  scaleName="probability"
+                  labelComponent={ValueAxisPercentLabel}
+                />
+                <Stack
+                  stacks={[{ series: ["insignificant", "significant"] }]}
+                />
+                <BarSeries
+                  valueField="percent"
+                  argumentField="displayName"
+                  scaleName="probability"
+                  pointComponent={BarSeriesColorCodedPoint(chartData)}
+                />
+              </Chart>
             </Box>
           </Paper>
         </Container>
@@ -496,24 +667,4 @@ export default function Predictor() {
       </div>
     );
   }
-  // };
-
-  // return (
-  //   <div>
-  //     <Container className={classes.container}>
-  //       <Box
-  //         className={classes.outerBox}
-  //         // justifyContent="center"
-  //         // display="flex"
-  //         // alignItems="center"
-  //         textAlign="center"
-  //       >
-  //         {body()}
-  //       </Box>
-  //     </Container>
-  //     <Box className={classes.stickToBottom}>
-  //       <Copyright />
-  //     </Box>
-  //   </div>
-  // );
 }

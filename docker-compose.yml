@@ -7,14 +7,6 @@ services:
     command: s3 cp --recursive /aws s3://${FRONTEND_S3_BUCKET_NAME}/
     environment:
       - NODE_ENV="production"
-      - REACT_APP_API_DOMAIN=${API_DOMAIN}
-      - REACT_APP_SITE_DOMAIN=${SITE_DOMAIN}
-      - REACT_APP_PROJECT_TITLE=${PROJECT_TITLE}
-      - REACT_APP_PROJECT_DESCRIPTION=${PROJECT_DESCRIPTION}
-      - REACT_APP_PROJECT_GITHUB_URL=${PROJECT_GITHUB_URL}
-      - REACT_APP_AUTHOR_NAME=${AUTHOR_NAME}
-      - REACT_AUTHOR_URL=${AUTHOR_URL}
-      - REACT_APP_TENSORBOARD_URL=${TENSORBOARD_URL}
       - AWS_ACCESS_KEY_ID=${FRONTEND_AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${FRONTEND_AWS_SECRET_ACCESS_KEY}
       - AWS_DEFAULT_REGION=${FRONTEND_AWS_DEFAULT_REGION}
@@ -33,13 +25,12 @@ services:
         "./gunicorn_conf.py",
         "app.main:app",
       ]
-    ports:
-      - 80:8000
     environment:
       - POETRY_VERSION=1.1.11
       - BACKEND_PROJECT_TITLE=${PROJECT_TITLE}
-      - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}
-      - BACKEND_ALLOWED_HOSTS=${BACKEND_ALLOWED_HOSTS}
+      - BACKEND_CORS_ORIGINS='["*"]'
+      - BACKEND_ALLOWED_HOSTS='["*"]'
+      - BACKEND_MODELS_SERVER_URL=https://models.architectureid.app
     links:
       - models
     volumes:
@@ -48,12 +39,12 @@ services:
   models:
     container_name: models
     image: tensorflow/serving:latest
-    ports:
-      - 8501:8501
     command:
       - --model_config_file=/config/models.prod.config
       - --model_config_file_poll_wait_seconds=300
       - --rest_api_timeout_in_ms=30000
+    ports:
+      - 8501:8501
     environment:
       - AWS_ACCESS_KEY_ID=${MODELS_AWS_ACCESS_KEY_ID}
       - AWS_REGION=${MODELS_AWS_REGION}

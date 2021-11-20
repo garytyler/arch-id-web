@@ -17,6 +17,8 @@ class Settings(_BaseSettings):
     PROJECT_TITLE: str
     ALLOWED_HOSTS: str
     CORS_ORIGINS: str
+    MODELS_SERVER_URL: str
+
 
     classes: List[Dict[str, str]] = [
         {
@@ -172,4 +174,5 @@ class Settings(_BaseSettings):
 
 @lru_cache()
 def get_settings():
-    return Settings()
+    settings = Settings()
+    return settings

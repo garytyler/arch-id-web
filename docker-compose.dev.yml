@@ -3,26 +3,27 @@ services:
     build:
       target: development
     command: yarn start
+    ports:
+      - 3000:3000
     volumes:
       - .:/srv
       - node_modules_data:/srv/frontend/node_modules
     environment:
       - NODE_ENV=development
-      - REACT_APP_SITE_DOMAIN=localhost:3000
-      - REACT_APP_API_DOMAIN=localhost:8000
       - AWS_ACCESS_KEY_ID=
       - AWS_SECRET_ACCESS_KEY=
       - AWS_DEFAULT_REGION=
-    ports:
-      - 3000:3000
+    links:
+      - models
 
   backend:
     build:
       target: development
     command: /bin/bash -c "python -m uvicorn app.main:app --host=0.0.0.0 --port=8000 --reload"
     environment:
-      - BACKEND_CORS_ORIGINS='["*"]'
-      - BACKEND_ALLOWED_HOSTS='["*"]'
+      - BACKEND_CORS_ORIGINS=["*"]
+      - BACKEND_ALLOWED_HOSTS=["*"]
+      - BACKEND_MODELS_SERVER_URL=http://models:8501
     volumes:
       - .:/srv
 
