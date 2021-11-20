@@ -124,7 +124,7 @@ export const PieSeriesLabeledPoint = (data: IChartDataPoint[]) => {
   return (props: PieSeries.PointProps) => {
     const { startAngle, endAngle, maxRadius, arg, val } = props;
 
-    const { x, y } = getCoordinates(startAngle, endAngle, maxRadius * 0.8);
+    const { x, y } = getCoordinates(startAngle, endAngle, maxRadius);
     return (
       <React.Fragment>
         <PieSeries.Point

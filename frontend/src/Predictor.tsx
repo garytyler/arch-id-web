@@ -56,7 +56,7 @@ const createChartData = (data: IDataPoint[]): IChartDataPoint[] => {
   for (let i in data) {
     const margin = (data[i].percent - minPercent) / signifTotal;
     const percentMargin = margin * 100;
-    if (data[i].percent > minPercent + 0.1) {
+    if (data[i].percent > minPercent + 0.01) {
       result[i] = {
         ...data[i],
         ...{
