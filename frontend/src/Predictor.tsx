@@ -266,7 +266,8 @@ export default function Predictor() {
           <Box className={classes.outerBox} textAlign="center">
             {input()}
             <Typography>
-              Submit an image of a building to predict the architectural style!
+              Submit an image of a structure to identify the architectural
+              style.
             </Typography>
           </Box>
         </Container>
