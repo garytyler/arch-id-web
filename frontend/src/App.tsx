@@ -80,7 +80,7 @@ export default function App() {
                     color="secondary"
                     noWrap
                     component="span"
-                    style={{ fontWeight: 900 }}
+                    style={{ fontStyle: "italic" }}
                   >
                     ID
                   </Typography>
