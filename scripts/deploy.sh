@@ -7,7 +7,7 @@ LOCAL_REPO_DIR="$(dirname "${THIS_DIR}")"
 REMOTE_REPO_DIR="~/repos/arch-id-web/"
 
 cd "${LOCAL_REPO_DIR}"
-msg "Changed to dir ${PWD}"
+echo "Changed to dir ${PWD}"
 
 # Create dest directory
 ssh -t ${EC2_USER}@${EC2_HOST} "mkdir -p ${REMOTE_REPO_DIR}"
