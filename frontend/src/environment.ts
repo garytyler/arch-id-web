@@ -7,11 +7,6 @@
 // export const AUTHOR_NAME = process.env.REACT_APP_AUTHOR_NAME;
 // export const AUTHOR_URL = process.env.REACT_APP_AUTHOR_URL;
 
-// export const API_DOMAIN =
-//   process.env.NODE_ENV === "production"
-//     ? "arch-id-load-balancer-1951441081.us-east-1.elb.amazonaws.com"
-//     : "localhost:8000";
-
 export const PREDICT_API_URL =
   process.env.NODE_ENV === "production"
     ? "https://api.architectureid.app"

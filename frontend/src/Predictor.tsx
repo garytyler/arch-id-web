@@ -13,7 +13,6 @@ import {
   CircularProgress,
   Container,
   Grid,
-  Link,
   makeStyles,
   Paper,
   Typography,
@@ -21,168 +20,20 @@ import {
 import { PhotoCamera } from "@material-ui/icons";
 import { ChangeEvent, default as React, useState } from "react";
 import "./App.css";
+import {
+  ArgumentAxisLinkLabel,
+  BarSeriesColorCodedPoint,
+  LegendColorCodedMarker,
+  LegendPercentLabel,
+  PieSeriesLabeledPoint,
+  ValueAxisPercentLabel,
+} from "./ChartComponents";
+import { CLASSES } from "./classes";
 import Copyright from "./Copyright";
 import { PREDICT_API_URL } from "./environment";
 import "./index.css";
+import { IChartDataPoint, IDataPoint, IModelsApiResponse } from "./types";
 import { imageToArray, softmax } from "./utils";
-
-interface Dictionary<T> {
-  [key: string]: T;
-}
-
-interface IModelsApiResponse {
-  predictions: number[][];
-}
-
-interface IClassItemItem {
-  name: string;
-  displayName: string;
-  wikipediaUrl: string;
-}
-
-interface IPredictApiResponseItem extends IClassItemItem {
-  prediction: number;
-  probability: number;
-}
-
-interface IDataPoint extends IPredictApiResponseItem {
-  percent: number;
-}
-
-interface IChartDataPoint extends IDataPoint {
-  probabilityMargin: number;
-  percentMargin: number;
-  color: string;
-}
-
-const CLASSES: IClassItemItem[] = [
-  {
-    name: "Achaemenid architecture",
-    displayName: "Achaemenid",
-    wikipediaUrl: "https://en.wikipedia.org/wiki/Achaemenid_architecture",
-  },
-  {
-    name: "American craftsman style",
-    displayName: "American Craftsman",
-    wikipediaUrl: "https://en.wikipedia.org/wiki/American_Craftsman",
-  },
-  {
-    name: "American Foursquare architecture",
-    displayName: "American Foursquare",
-    wikipediaUrl: "https://en.wikipedia.org/wiki/American_Foursquare",
-  },
-  {
-    name: "Ancient Egyptian architecture",
-    displayName: "Ancient Egyptian",
-    wikipediaUrl: "https://en.wikipedia.org/wiki/Ancient_Egyptian_architecture",
-  },
-  {
-    name: "Art Deco architecture",
-    displayName: "Art Deco",
-    wikipediaUrl: "https://en.wikipedia.org/wiki/Art_Deco",
-  },
-  {
-    name: "Art Nouveau architecture",
-    displayName: "Art Nouveau",
-    wikipediaUrl: "https://en.wikipedia.org/wiki/Art_Nouveau",
-  },
-  {
-    name: "Baroque architecture",
-    displayName: "Baroque",
-    wikipediaUrl: "https://en.wikipedia.org/wiki/Baroque_architecture",
-  },
-  {
-    name: "Bauhaus architecture",
-    displayName: "Bauhaus",
-    wikipediaUrl: "https://en.wikipedia.org/wiki/Bauhaus",
-  },
-  {
-    name: "Beaux-Arts architecture",
-    displayName: "Beaux-Arts",
-    wikipediaUrl: "https://en.wikipedia.org/wiki/Beaux-Arts_architecture",
-  },
-  {
-    name: "Byzantine architecture",
-    displayName: "Byzantine",
-    wikipediaUrl: "https://en.wikipedia.org/wiki/Byzantine_architecture",
-  },
-  {
-    name: "Chicago school architecture",
-    displayName: "Chicago school",
-    wikipediaUrl: "https://en.wikipedia.org/wiki/Chicago_school_(architecture)",
-  },
-  {
-    name: "Colonial architecture",
-    displayName: "Colonial",
-    wikipediaUrl: "https://en.wikipedia.org/wiki/Colonial_architecture",
-  },
-  {
-    name: "Deconstructivism",
-    displayName: "Deconstructivism",
-    wikipediaUrl: "https://en.wikipedia.org/wiki/Deconstructivism",
-  },
-  {
-    name: "Edwardian architecture",
-    displayName: "Edwardian",
-    wikipediaUrl: "https://en.wikipedia.org/wiki/Edwardian_architecture",
-  },
-  {
-    name: "Georgian architecture",
-    displayName: "Georgian",
-    wikipediaUrl: "https://en.wikipedia.org/wiki/Georgian_architecture",
-  },
-  {
-    name: "Gothic architecture",
-    displayName: "Gothic",
-    wikipediaUrl: "https://en.wikipedia.org/wiki/Gothic_architecture",
-  },
-  {
-    name: "Greek Revival architecture",
-    displayName: "Greek Revival",
-    wikipediaUrl: "https://en.wikipedia.org/wiki/Greek_Revival_architecture",
-  },
-  {
-    name: "International style",
-    displayName: "International Style",
-    wikipediaUrl:
-      "https://en.wikipedia.org/wiki/International_Style_(architecture)",
-  },
-  {
-    name: "Novelty architecture",
-    displayName: "Novelty",
-    wikipediaUrl: "https://en.wikipedia.org/wiki/Novelty_architecture",
-  },
-  {
-    name: "Palladian architecture",
-    displayName: "Palladian",
-    wikipediaUrl: "https://en.wikipedia.org/wiki/Palladian_architecture",
-  },
-  {
-    name: "Postmodern architecture",
-    displayName: "Postmodern",
-    wikipediaUrl: "https://en.wikipedia.org/wiki/Postmodern_architecture",
-  },
-  {
-    name: "Queen Anne architecture",
-    displayName: "Queen Anne",
-    wikipediaUrl: "https://en.wikipedia.org/wiki/Queen_Anne_style_architecture",
-  },
-  {
-    name: "Romanesque architecture",
-    displayName: "Romanesque",
-    wikipediaUrl: "https://en.wikipedia.org/wiki/Romanesque_architecture",
-  },
-  {
-    name: "Russian Revival architecture",
-    displayName: "Russian Revival",
-    wikipediaUrl: "https://en.wikipedia.org/wiki/Russian_Revival_architecture",
-  },
-  {
-    name: "Tudor Revival architecture",
-    displayName: "Tudor Revival",
-    wikipediaUrl: "https://en.wikipedia.org/wiki/Tudor_Revival_architecture",
-  },
-];
 
 const createChartData = (data: IDataPoint[]): IChartDataPoint[] => {
   let colorIndex = 0;
@@ -231,161 +82,6 @@ const createChartData = (data: IDataPoint[]): IChartDataPoint[] => {
   );
 };
 
-export interface MarkerProps {
-  // From: https://github.com/DevExpress/devextreme-reactive/blob/11e41e0a763477fdee164539f11bcb4e23c86e80/packages/dx-react-chart/src/types/plugins.legend.types.ts#L24
-  color?: string;
-  name?: string;
-  [key: string]: unknown;
-}
-
-export class Marker extends React.PureComponent<MarkerProps> {
-  render() {
-    const { color, ...restProps } = this.props;
-    return (
-      <svg fill={color} width="10" height="10" {...restProps}>
-        <circle r={5} cx={5} cy={5} {...restProps} />
-      </svg>
-    );
-  }
-}
-
-const LegendColorCodedMarker = (data: IChartDataPoint[]) => {
-  const dataByDisplayName = chartDataToDictionary(data);
-  return (props: MarkerProps) => {
-    if (props.name === undefined) {
-      return <Legend.Marker {...props} />;
-    } else {
-      return (
-        <Legend.Marker {...props} color={dataByDisplayName[props.name].color} />
-      );
-    }
-  };
-};
-
-const LegendPercentLabel = (data: IChartDataPoint[]) => {
-  const dataByDisplayName = chartDataToDictionary(data);
-
-  return (props: Legend.LabelProps) => {
-    return (
-      <div>
-        <Box marginLeft={1} component="span">
-          <Typography color="textPrimary" component="span">
-            <b>
-              {" "}
-              {" " +
-                dataByDisplayName[props.text.toString()].percentMargin
-                  .toFixed(1)
-                  .toString() +
-                "% "}
-            </b>
-            {props.text}
-          </Typography>
-        </Box>
-
-        <Box marginLeft={1} component="span">
-          <Link
-            href={dataByDisplayName[props.text.toString()].wikipediaUrl}
-            target="_blank"
-            variant="inherit"
-          >
-            <Button
-              variant="text"
-              color="primary"
-              component="span"
-              size="small"
-            >
-              Learn More
-            </Button>
-          </Link>
-        </Box>
-      </div>
-    );
-  };
-};
-
-const ArgumentAxisLinkLabel = (data: IChartDataPoint[]) => {
-  return (props: ArgumentAxis.LabelProps) => {
-    return <ArgumentAxis.Label {...props} text={props.text} />;
-  };
-};
-
-const ValueAxisPercentLabel = (props: ValueAxis.LabelProps) => {
-  return <ValueAxis.Label {...props} text={props.text + "%"} />;
-};
-
-const chartDataToDictionary = (data: IChartDataPoint[]) => {
-  const result: Dictionary<IChartDataPoint> = {};
-  for (let i in data) {
-    result[data[i].displayName] = data[i];
-  }
-  return result;
-};
-
-const PieSeriesLabeledPoint = (data: IChartDataPoint[]) => {
-  const dataByDisplayName = chartDataToDictionary(data);
-  const getCoordinates = (
-    startAngle: number,
-    endAngle: number,
-    maxRadius: number
-  ) => {
-    const angle = startAngle + (endAngle - startAngle) / 2;
-    const indent = 10;
-    return {
-      x: (maxRadius + indent) * Math.sin(angle),
-      y: (maxRadius + indent) * Math.cos(angle),
-    };
-  };
-
-  return (props: PieSeries.PointProps) => {
-    const { startAngle, endAngle, maxRadius, arg, val } = props;
-
-    const { x, y } = getCoordinates(startAngle, endAngle, maxRadius * 0.8);
-    return (
-      <React.Fragment>
-        <PieSeries.Point
-          {...props}
-          color={dataByDisplayName[props.argument].color}
-        />
-        <Chart.Label
-          x={arg + x}
-          y={val - y}
-          dominantBaseline="middle"
-          textAnchor="middle"
-        >
-          {dataByDisplayName[props.argument].percentMargin
-            .toFixed(1)
-            .toString() + "%"}
-        </Chart.Label>
-      </React.Fragment>
-    );
-  };
-};
-
-const BarSeriesColorCodedPoint = (data: IChartDataPoint[]) => {
-  const dataByDisplayName = chartDataToDictionary(data);
-
-  return (props: BarSeries.PointProps) => {
-    const { arg, val } = props;
-    return (
-      <React.Fragment>
-        <BarSeries.Point
-          {...{ ...props, color: dataByDisplayName[props.argument].color }}
-        />
-        <Chart.Label
-          x={val > 30 ? val - 1 : val + 1}
-          y={arg}
-          dominantBaseline="mathematical"
-          textAnchor={val > 30 ? "end" : "start"}
-        >
-          {" " +
-            dataByDisplayName[props.argument].percent.toFixed(1).toString() +
-            "%"}
-        </Chart.Label>
-      </React.Fragment>
-    );
-  };
-};
-
 const useStyles = makeStyles(
   (theme: {
     spacing: (
@@ -413,10 +109,6 @@ const useStyles = makeStyles(
         marginBottom: theme.spacing(6),
         padding: theme.spacing(3),
       },
-    },
-    button: {
-      marginTop: theme.spacing(3),
-      marginLeft: theme.spacing(1),
     },
     content: {
       flexGrow: 1,
@@ -566,7 +258,7 @@ export default function Predictor() {
   // const isSmallScreen = useMediaQuery(() => {
   //   return theme.breakpoints.down("xs");
   // });
-  // const body = () => {
+
   if (!selectedFile) {
     return (
       <div>
