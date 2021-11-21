@@ -127,8 +127,8 @@ const useStyles = makeStyles(
       },
     },
     content: {
-      flexGrow: 1,
-      overflow: "auto",
+      // flexGrow: 1,
+      // overflow: "auto",
     },
     stickToBottom: {
       width: "100%",
@@ -313,16 +313,18 @@ export default function Predictor() {
             <Box className={classes.outerBox} textAlign="center">
               <Box>{input()}</Box>
 
-              <Box margin={1}>
+              <Box margin={0}>
                 <Typography variant="caption">{selectedFile.name}</Typography>
               </Box>
 
-              <Box margin={1}>
+              <Box margin={2}>
                 <img
+                  style={{
+                    maxWidth: "100%",
+                    maxHeight: 300,
+                  }}
                   src={URL.createObjectURL(selectedFile)}
-                  alt="Source"
-                  id="placeholder"
-                  height={200}
+                  alt="source"
                 />
               </Box>
 
@@ -344,7 +346,7 @@ export default function Predictor() {
               </Box>
 
               <Grid container justifyContent="center">
-                <Chart data={pieChartData} height={pieChartData.length * 55}>
+                <Chart data={pieChartData} height={pieChartData.length * 50}>
                   <Animation />
                   <Legend
                     position="top"
