@@ -39,12 +39,20 @@ const createChartData = (data: IDataPoint[]): IChartDataPoint[] => {
   let colorIndex = 0;
   const colors = [
     "#42A5F5",
-    "#FF7043",
+    "#EB6D00",
     "#9CCC65",
-    "#FFCA28",
     "#26A69A",
+    "#855200",
+    "#0CCCD4",
+    "#B942BD",
     "#EC407A",
+    "#30277A",
+    "#E76F5B",
+    "#285DFF",
+    "#003385",
+    "#40ECB2",
   ];
+
   const percents = Object.values(data).map((i) => i.percent);
   const minPercent = Math.min(...percents);
 
@@ -103,11 +111,19 @@ const useStyles = makeStyles(
     outerBox: {
       marginTop: theme.spacing(3),
       marginBottom: theme.spacing(3),
-      padding: theme.spacing(2),
+      padding: theme.spacing(1),
+      paddingLeft: theme.spacing(0),
+      paddingRight: theme.spacing(0),
+      marginLeft: theme.spacing(0),
+      marginRight: theme.spacing(0),
       [theme.breakpoints.up(600 + theme.spacing(3) * 2)]: {
         marginTop: theme.spacing(6),
         marginBottom: theme.spacing(6),
-        padding: theme.spacing(3),
+        padding: theme.spacing(2),
+        paddingLeft: theme.spacing(0),
+        paddingRight: theme.spacing(0),
+        marginLeft: theme.spacing(0),
+        marginRight: theme.spacing(0),
       },
     },
     content: {
@@ -137,13 +153,11 @@ export default function Predictor() {
   const changeHandler = (event: ChangeEvent<HTMLInputElement> | null) => {
     if (event?.target?.files) {
       setChartData([]);
-      loadChartDataFromPredictApi(event);
+      loadDataFromPredictApi(event);
     }
   };
 
-  const loadChartDataFromPredictApi = (
-    event: ChangeEvent<HTMLInputElement>
-  ) => {
+  const loadDataFromPredictApi = (event: ChangeEvent<HTMLInputElement>) => {
     if (event?.target?.files) {
       const file = event.target.files[0];
       setSelectedFile(file);
@@ -175,7 +189,7 @@ export default function Predictor() {
     }
   };
 
-  const loadChartDataFromModelsApi = (event: ChangeEvent<HTMLInputElement>) => {
+  const loadDataFromModelsApi = (event: ChangeEvent<HTMLInputElement>) => {
     if (event?.target?.files) {
       const image = new Image();
       image.src = URL.createObjectURL(event.target.files[0]);
@@ -237,7 +251,7 @@ export default function Predictor() {
               onChange={changeHandler}
             />
             <Button
-              // size="large"
+              size="large"
               variant="contained"
               color="primary"
               component="span"
@@ -247,7 +261,6 @@ export default function Predictor() {
             </Button>
           </label>
         </Box>
-        {/* <Box height="3rem">{status()}</Box> */}
       </Grid>
     );
   };
@@ -290,13 +303,16 @@ export default function Predictor() {
       </div>
     );
   } else {
-    const pieChartData = chartData.filter((i) => i.probabilityMargin > 0);
+    const pieChartData: IChartDataPoint[] = chartData.filter(
+      (i) => i.probabilityMargin > 0
+    );
     return (
       <div>
         <Container className={classes.container}>
           <Paper className={classes.paper}>
             <Box className={classes.outerBox} textAlign="center">
               <Box>{input()}</Box>
+
               <Box margin={1}>
                 <Typography variant="caption">{selectedFile.name}</Typography>
               </Box>
@@ -310,48 +326,70 @@ export default function Predictor() {
                 />
               </Box>
 
-              <Typography variant="h5" align="left">
-                Prediction
-              </Typography>
+              <Box marginTop={4} marginBottom={2}>
+                <Typography variant="h5" align="center">
+                  Prediction
+                </Typography>
+              </Box>
 
-              <Chart data={pieChartData}>
-                <Animation />
-                <PieSeries
-                  valueField="percentMargin"
-                  argumentField="displayName"
-                  pointComponent={PieSeriesLabeledPoint(pieChartData)}
-                />
-                <Legend
-                  position="top"
-                  markerComponent={LegendColorCodedMarker(pieChartData)}
-                  labelComponent={LegendPercentLabel(pieChartData)}
-                />
-              </Chart>
+              <Box marginX={3}>
+                <Chart data={pieChartData} height={300}>
+                  <Animation />
+                  <PieSeries
+                    valueField="percentMargin"
+                    argumentField="displayName"
+                    pointComponent={PieSeriesLabeledPoint(pieChartData)}
+                  />
+                </Chart>
+              </Box>
 
-              <br />
-              <Typography variant="h5" align="left">
+              <Grid container justifyContent="center">
+                <Chart data={pieChartData} height={pieChartData.length * 55}>
+                  <Animation />
+                  <Legend
+                    position="top"
+                    markerComponent={LegendColorCodedMarker(pieChartData)}
+                    labelComponent={LegendPercentLabel(pieChartData)}
+                  />
+                  <PieSeries
+                    valueField="percentMargin"
+                    argumentField="displayName"
+                    outerRadius={0}
+                    innerRadius={0}
+                  />
+                </Chart>
+              </Grid>
+
+              <Typography variant="h5" align="center">
                 Probabilities
               </Typography>
-              <Chart data={chartData} rotated>
-                <Animation />
-                <ValueScale name="probability" modifyDomain={adjustDomain} />
-                <ArgumentAxis
-                  labelComponent={ArgumentAxisLinkLabel(chartData)}
-                />
-                <ValueAxis
-                  scaleName="probability"
-                  labelComponent={ValueAxisPercentLabel}
-                />
-                <Stack
-                  stacks={[{ series: ["insignificant", "significant"] }]}
-                />
-                <BarSeries
-                  valueField="percent"
-                  argumentField="displayName"
-                  scaleName="probability"
-                  pointComponent={BarSeriesColorCodedPoint(chartData)}
-                />
-              </Chart>
+              <Grid container justifyContent="center">
+                <Box width={600} marginX={2}>
+                  <Chart data={chartData} rotated>
+                    <Animation />
+                    <ValueScale
+                      name="probability"
+                      modifyDomain={adjustDomain}
+                    />
+                    <ArgumentAxis
+                      labelComponent={ArgumentAxisLinkLabel(chartData)}
+                    />
+                    <ValueAxis
+                      scaleName="probability"
+                      labelComponent={ValueAxisPercentLabel}
+                    />
+                    <Stack
+                      stacks={[{ series: ["insignificant", "significant"] }]}
+                    />
+                    <BarSeries
+                      valueField="percent"
+                      argumentField="displayName"
+                      scaleName="probability"
+                      pointComponent={BarSeriesColorCodedPoint(chartData)}
+                    />
+                  </Chart>
+                </Box>
+              </Grid>
             </Box>
           </Paper>
         </Container>

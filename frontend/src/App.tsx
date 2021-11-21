@@ -19,7 +19,6 @@ import {
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import { default as React } from "react";
 import { PROJECT_GITHUB_URL, TENSORBOARD_URL } from "./environment";
-// import GithubIcon from "./github-icon.svg";
 import Predictor from "./Predictor";
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -41,11 +40,7 @@ const useStyles = makeStyles((theme: Theme) =>
       fontWeight: 900,
       lineHeight: 0,
     },
-    subTitle: {
-      // fontSize: "1.5em",
-      // fontWeight: 900,
-      // lineHeight: 0,
-    },
+    subTitle: {},
     iconButton: {
       padding: 10,
     },

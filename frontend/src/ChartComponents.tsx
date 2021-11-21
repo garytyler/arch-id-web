@@ -61,10 +61,9 @@ export const LegendPercentLabel = (data: IChartDataPoint[]) => {
   return (props: Legend.LabelProps) => {
     return (
       <div>
-        <Box marginLeft={1} component="span">
-          <Typography color="textPrimary" component="span">
+        <Box marginLeft={1} marginRight={0} paddingX={0} component="span">
+          <Typography variant="body2" color="textPrimary" component="span">
             <b>
-              {" "}
               {" " +
                 dataByDisplayName[props.text.toString()].percentMargin
                   .toFixed(1)
@@ -75,18 +74,20 @@ export const LegendPercentLabel = (data: IChartDataPoint[]) => {
           </Typography>
         </Box>
 
-        <Box marginLeft={1} component="span">
+        <Box marginLeft={0} paddingLeft={0} component="span">
           <Link
             href={dataByDisplayName[props.text.toString()].wikipediaUrl}
             target="_blank"
             variant="inherit"
           >
             <Button
+              style={{ paddingRight: 0, marginRight: 0 }}
               variant="text"
               color="primary"
               component="span"
               size="small"
             >
+              {" "}
               Learn More
             </Button>
           </Link>
@@ -96,50 +97,71 @@ export const LegendPercentLabel = (data: IChartDataPoint[]) => {
   };
 };
 
-export const ArgumentAxisLinkLabel = (data: IChartDataPoint[]) => {
-  return (props: ArgumentAxis.LabelProps) => {
+export const ArgumentAxisLinkLabel =
+  (data: IChartDataPoint[]) => (props: ArgumentAxis.LabelProps) => {
     return <ArgumentAxis.Label {...props} text={props.text} />;
   };
-};
 
 export const ValueAxisPercentLabel = (props: ValueAxis.LabelProps) => {
-  return <ValueAxis.Label {...props} text={props.text + "%"} />;
+  if (Number(props.text) % 1 !== 0) {
+    return null;
+  }
+
+  return (
+    <ValueAxis.Label {...props} text={Number(props.text).toString() + "%"} />
+  );
 };
 
 export const PieSeriesLabeledPoint = (data: IChartDataPoint[]) => {
   const dataByDisplayName = chartDataToDictionary(data);
-  const getCoordinates = (
+
+  let maxDataPoint: IChartDataPoint = data[0];
+  for (let n = 1; n < data.length; n++) {
+    if (data[n].percentMargin > maxDataPoint.percentMargin) {
+      maxDataPoint = data[n];
+    }
+  }
+
+  const getLabelCoordinates = (
     startAngle: number,
     endAngle: number,
-    maxRadius: number
+    maxRadius: number,
+    arg: number,
+    val: number
   ) => {
     const angle = startAngle + (endAngle - startAngle) / 2;
-    const indent = 10;
+    const indent = maxRadius / -2;
+    const x = arg + (maxRadius + indent) * Math.sin(angle);
+    const y = val - (maxRadius + indent) * Math.cos(angle);
     return {
-      x: (maxRadius + indent) * Math.sin(angle),
-      y: (maxRadius + indent) * Math.cos(angle),
+      x: x,
+      y: y,
     };
   };
-
   return (props: PieSeries.PointProps) => {
     const { startAngle, endAngle, maxRadius, arg, val } = props;
-
-    const { x, y } = getCoordinates(startAngle, endAngle, maxRadius);
+    const { x, y } = getLabelCoordinates(
+      startAngle,
+      endAngle,
+      maxRadius,
+      arg,
+      val
+    );
     return (
       <React.Fragment>
         <PieSeries.Point
           {...props}
+          maxRadius={maxRadius * 1.1}
           color={dataByDisplayName[props.argument].color}
         />
-        <Chart.Label
-          x={arg + x}
-          y={val - y}
-          dominantBaseline="middle"
-          textAnchor="middle"
-        >
-          {dataByDisplayName[props.argument].percentMargin
-            .toFixed(1)
-            .toString() + "%"}
+        <Chart.Label x={x} y={y} dominantBaseline="middle" textAnchor="middle">
+          {dataByDisplayName[props.argument] === maxDataPoint
+            ? dataByDisplayName[props.argument].percentMargin
+                .toFixed(1)
+                .toString() +
+              "% " +
+              dataByDisplayName[props.argument].displayName
+            : ""}
         </Chart.Label>
       </React.Fragment>
     );
@@ -148,6 +170,12 @@ export const PieSeriesLabeledPoint = (data: IChartDataPoint[]) => {
 
 export const BarSeriesColorCodedPoint = (data: IChartDataPoint[]) => {
   const dataByDisplayName = chartDataToDictionary(data);
+  let maxDataPoint: IChartDataPoint = data[0];
+  for (let i = 1; i < data.length; i++) {
+    if (data[i].percent > maxDataPoint.percent) {
+      maxDataPoint = data[i];
+    }
+  }
 
   return (props: BarSeries.PointProps) => {
     const { arg, val } = props;
@@ -157,10 +185,18 @@ export const BarSeriesColorCodedPoint = (data: IChartDataPoint[]) => {
           {...{ ...props, color: dataByDisplayName[props.argument].color }}
         />
         <Chart.Label
-          x={val > 30 ? val - 1 : val + 1}
+          x={
+            dataByDisplayName[props.argument].percent > maxDataPoint.percent / 2
+              ? val - 1
+              : val + 1
+          }
           y={arg}
           dominantBaseline="mathematical"
-          textAnchor={val > 30 ? "end" : "start"}
+          textAnchor={
+            dataByDisplayName[props.argument].percent > maxDataPoint.percent / 2
+              ? "end"
+              : "start"
+          }
         >
           {" " +
             dataByDisplayName[props.argument].percent.toFixed(1).toString() +
