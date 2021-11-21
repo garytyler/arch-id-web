@@ -20,13 +20,13 @@ def test_tf_serving(sample_image_path, settings):
     scores = tf.nn.softmax(predictions)
     pred_y = settings.classes[np.argmax(scores)]
     true_y = img_path.parent.name
-    print(
-        f"path: {img_path}"
-        f"\npred: {pred_y}"
-        f"\ntrue: {true_y}"
-        f"\nconf: {100 * np.max(scores):.2f}%",
-        *(
-            f"\n\t{n:0>2}-{settings.classes[n]:.<25}{100 * i:.2f}%"
-            for n, i in enumerate(scores)
-        ),
-    )
+    # print(
+    #     f"path: {img_path}"
+    #     f"\npred: {pred_y}"
+    #     f"\ntrue: {true_y}"
+    #     f"\nconf: {100 * np.max(scores):.2f}%",
+    #     *(
+    #         f"\n\t{n:0>2}-{settings.classes[n]:.<25}{100 * i:.2f}%"
+    #         for n, i in enumerate(scores)
+    #     ),
+    # )

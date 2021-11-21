@@ -15,10 +15,7 @@ class _BaseSettings(pydantic.BaseSettings):
 
 class Settings(_BaseSettings):
     PROJECT_TITLE: str
-    ALLOWED_HOSTS: str
-    CORS_ORIGINS: str
     MODELS_SERVER_URL: str
-
 
     classes: List[Dict[str, str]] = [
         {

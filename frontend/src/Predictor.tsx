@@ -184,7 +184,6 @@ export default function Predictor() {
         if (imageArray === null) return;
         let expImageArray = [imageArray];
         const url = `${PREDICT_API_URL}/v1/models/InceptionResNetV2-imagenet:predict`;
-        // const url = `http://api.architectureid.ai/v1/models/InceptionResNetV2-imagenet:predict`;
         fetch(url, {
           method: "POST",
           headers: {

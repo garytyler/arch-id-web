@@ -11,11 +11,11 @@ async def get_metadata(model_name: str):
     return resp_data
 
 
-async def base_cnn(model_name: str):
+async def get_base_cnn(model_name: str):
     return get_settings().base_cnns[model_name.split("-")[0]]
 
 
-async def input_shape(model_name):
+async def get_input_shape(model_name):
     metadata = await get_metadata(model_name)
     dims = metadata
     for k in [

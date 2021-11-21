@@ -23,8 +23,6 @@ services:
     ports:
       - 8000:8000
     environment:
-      - BACKEND_CORS_ORIGINS=["*"]
-      - BACKEND_ALLOWED_HOSTS=["*"]
       - BACKEND_MODELS_SERVER_URL=http://models:8501
     volumes:
       - .:/srv

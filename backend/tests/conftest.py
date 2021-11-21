@@ -1,8 +1,14 @@
 from pathlib import Path
 
 import pytest
-import tensorflow as tf
 from fastapi.testclient import TestClient
+
+
+@pytest.fixture
+def settings():
+    from app.settings import Settings
+
+    return Settings()
 
 
 @pytest.fixture
@@ -19,10 +25,10 @@ def client(app):
 
 
 @pytest.fixture
-def settings():
-    return Settings()
+def sample_image_path():
+    return Path(__file__).parent / "assets" / "sample.jpg"
 
 
 @pytest.fixture
-def sample_image_path():
-    return Path(__file__).parent / "assets" / "sample.jpg"
+def model_name():
+    return "InceptionResNetV2-imagenet"

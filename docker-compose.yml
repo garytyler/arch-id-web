@@ -27,7 +27,7 @@ services:
       ]
     environment:
       - POETRY_VERSION=1.1.11
-      - BACKEND_PROJECT_TITLE=${PROJECT_TITLE}
+      - BACKEND_PROJECT_TITLE=ArchitectureID.ai
       - BACKEND_CORS_ORIGINS='["*"]'
       - BACKEND_ALLOWED_HOSTS='["*"]'
       - BACKEND_MODELS_SERVER_URL=https://models.architectureid.ai

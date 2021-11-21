@@ -1,12 +1,12 @@
 from io import BytesIO
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 
 import aiohttp
 import tensorflow as tf
 from fastapi import APIRouter, Depends, File
 from PIL import Image
 
-from .dependencies import base_cnn, get_metadata, input_shape
+from .dependencies import get_base_cnn, get_input_shape, get_metadata
 from .models import BaseModelOut
 from .settings import BaseCNN, get_settings
 
@@ -21,7 +21,7 @@ class PredictItemOut(BaseModelOut):
     wikipedia_url: str
 
 
-@api_router.post("/metadata/{model_name}")
+@api_router.post("/metadata/{model_name}", response_model=Dict[str, dict])
 async def metadata(
     metadata: dict = Depends(get_metadata),
 ):
@@ -31,9 +31,9 @@ async def metadata(
 @api_router.post("/predict/{model_name}", response_model=List[PredictItemOut])
 async def predict(
     model_name: str,
-    base_cnn: BaseCNN = Depends(base_cnn),
+    base_cnn: BaseCNN = Depends(get_base_cnn),
     files: List[bytes] = File(...),
-    input_shape: Tuple[int, int, int, int] = Depends(input_shape),
+    input_shape: Tuple[int, int, int, int] = Depends(get_input_shape),
 ):
     img = Image.open(BytesIO(files[0]))
     img_array = tf.keras.preprocessing.image.img_to_array(img)
