@@ -71,7 +71,12 @@ export default function App() {
     <div className={classes.root}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <AppBar color="default" position="absolute" className={classes.appBar}>
+        <AppBar
+          color="default"
+          position="absolute"
+          className={classes.appBar}
+          elevation={8}
+        >
           <Toolbar>
             <Box className={classes.titleBox}>
               <Link
@@ -103,15 +108,16 @@ export default function App() {
                 >
                   .ai
                 </Typography>
+
+                <br />
+                <Typography
+                  variant="caption"
+                  color="textSecondary"
+                  className={classes.subTitle}
+                >
+                  Identify architectural style with deep learning
+                </Typography>
               </Link>
-              <br />
-              <Typography
-                variant="caption"
-                color="textSecondary"
-                className={classes.subTitle}
-              >
-                Identify architectural style with deep learning
-              </Typography>
             </Box>
             <Box style={{ display: "flex" }} marginY={0}>
               <IconButton

@@ -15,13 +15,15 @@ import {
   Grid,
   makeStyles,
   Paper,
+  Theme,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@material-ui/core";
 import { PhotoCamera } from "@material-ui/icons";
 import { ChangeEvent, default as React, useState } from "react";
 import "./App.css";
 import {
-  ArgumentAxisLinkLabel,
   BarSeriesColorCodedPoint,
   LegendColorCodedMarker,
   LegendPercentLabel,
@@ -105,10 +107,7 @@ const useStyles = makeStyles(
         paddingTop: theme.spacing(4),
       },
     },
-    paper: {
-      elevation: 10,
-    },
-    outerBox: {
+    innerBox: {
       marginTop: theme.spacing(3),
       marginBottom: theme.spacing(3),
       padding: theme.spacing(1),
@@ -125,10 +124,6 @@ const useStyles = makeStyles(
         marginLeft: theme.spacing(0),
         marginRight: theme.spacing(0),
       },
-    },
-    content: {
-      // flexGrow: 1,
-      // overflow: "auto",
     },
     stickToBottom: {
       width: "100%",
@@ -265,22 +260,38 @@ export default function Predictor() {
     );
   };
 
-  // // Check if mobile device
-  // const theme: Theme = useTheme();
-  // const isSmallScreen = useMediaQuery(() => {
-  //   return theme.breakpoints.down("xs");
-  // });
+  // Check if mobile device
+  const theme: Theme = useTheme();
+  const isSmallScreen = useMediaQuery(() => {
+    return theme.breakpoints.down("xs");
+  });
 
   if (!selectedFile) {
     return (
       <div>
         <Container className={classes.container}>
-          <Box className={classes.outerBox} textAlign="center">
-            {input()}
-            <Typography>
-              Submit an image of a structure to identify the architectural
-              style.
-            </Typography>
+          <Box
+            style={{ margin: "auto" }}
+            textAlign="center"
+            // minWidth={200}
+            maxWidth={320}
+          >
+            <Paper elevation={5}>
+              <Box className={classes.innerBox} textAlign="center">
+                {input()}
+                <Box
+                  marginTop={2}
+                  marginBottom={2}
+                  marginLeft={4}
+                  marginRight={4}
+                >
+                  <Typography>
+                    Submit an image of a structure to identify it's
+                    architectural style.
+                  </Typography>
+                </Box>
+              </Box>{" "}
+            </Paper>
           </Box>
         </Container>
         <Box className={classes.stickToBottom}>
@@ -292,9 +303,20 @@ export default function Predictor() {
     return (
       <div>
         <Container className={classes.container}>
-          <Box className={classes.outerBox} textAlign="center">
-            {input()}
-            <CircularProgress color="secondary" />
+          <Box style={{ margin: "auto" }} textAlign="center" maxWidth={320}>
+            <Paper elevation={5}>
+              <Box className={classes.innerBox} textAlign="center">
+                {input()}
+                <Box
+                  marginTop={2}
+                  marginBottom={2}
+                  marginLeft={4}
+                  marginRight={4}
+                >
+                  <CircularProgress color="secondary" />
+                </Box>
+              </Box>
+            </Paper>
           </Box>
         </Container>
         <Box className={classes.stickToBottom}>
@@ -309,91 +331,94 @@ export default function Predictor() {
     return (
       <div>
         <Container className={classes.container}>
-          <Paper className={classes.paper}>
-            <Box className={classes.outerBox} textAlign="center">
-              <Box>{input()}</Box>
+          <Box style={{ margin: "auto" }} textAlign="center" maxWidth={1000}>
+            <Paper elevation={5}>
+              <Box className={classes.innerBox} textAlign="center">
+                <Box>{input()}</Box>
 
-              <Box margin={0}>
-                <Typography variant="caption">{selectedFile.name}</Typography>
-              </Box>
+                <Box marginX={4}>
+                  <Typography variant="caption">{selectedFile.name}</Typography>
+                </Box>
 
-              <Box margin={2}>
-                <img
-                  style={{
-                    maxWidth: "100%",
-                    maxHeight: 300,
-                  }}
-                  src={URL.createObjectURL(selectedFile)}
-                  alt="source"
-                />
-              </Box>
-
-              <Box marginTop={4} marginBottom={2}>
-                <Typography variant="h5" align="center">
-                  Prediction
-                </Typography>
-              </Box>
-
-              <Box marginX={3}>
-                <Chart data={pieChartData} height={300}>
-                  <Animation />
-                  <PieSeries
-                    valueField="percentMargin"
-                    argumentField="displayName"
-                    pointComponent={PieSeriesLabeledPoint(pieChartData)}
+                <Box margin={2}>
+                  <img
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: 300,
+                    }}
+                    src={URL.createObjectURL(selectedFile)}
+                    alt="source"
                   />
-                </Chart>
-              </Box>
+                </Box>
 
-              <Grid container justifyContent="center">
-                <Chart data={pieChartData} height={pieChartData.length * 50}>
-                  <Animation />
-                  <Legend
-                    position="top"
-                    markerComponent={LegendColorCodedMarker(pieChartData)}
-                    labelComponent={LegendPercentLabel(pieChartData)}
-                  />
-                  <PieSeries
-                    valueField="percentMargin"
-                    argumentField="displayName"
-                    outerRadius={0}
-                    innerRadius={0}
-                  />
-                </Chart>
-              </Grid>
+                <Box marginTop={4} marginBottom={2}>
+                  <Typography variant="h5" align="center">
+                    Prediction
+                  </Typography>
+                </Box>
 
-              <Typography variant="h5" align="center">
-                Probabilities
-              </Typography>
-              <Grid container justifyContent="center">
-                <Box width={600} marginX={2}>
-                  <Chart data={chartData} rotated>
+                <Box marginX={3}>
+                  <Chart data={pieChartData} height={300}>
                     <Animation />
-                    <ValueScale
-                      name="probability"
-                      modifyDomain={adjustDomain}
-                    />
-                    <ArgumentAxis
-                      labelComponent={ArgumentAxisLinkLabel(chartData)}
-                    />
-                    <ValueAxis
-                      scaleName="probability"
-                      labelComponent={ValueAxisPercentLabel}
-                    />
-                    <Stack
-                      stacks={[{ series: ["insignificant", "significant"] }]}
-                    />
-                    <BarSeries
-                      valueField="percent"
+                    <PieSeries
+                      valueField="percentMargin"
                       argumentField="displayName"
-                      scaleName="probability"
-                      pointComponent={BarSeriesColorCodedPoint(chartData)}
+                      pointComponent={PieSeriesLabeledPoint(pieChartData)}
                     />
                   </Chart>
                 </Box>
-              </Grid>
-            </Box>
-          </Paper>
+
+                <Grid container justifyContent="center">
+                  <Chart data={pieChartData} height={pieChartData.length * 50}>
+                    <Animation />
+                    <Legend
+                      position="top"
+                      markerComponent={LegendColorCodedMarker(pieChartData)}
+                      labelComponent={LegendPercentLabel(pieChartData)}
+                    />
+                    <PieSeries
+                      valueField="percentMargin"
+                      argumentField="displayName"
+                      outerRadius={0}
+                      innerRadius={0}
+                    />
+                  </Chart>
+                </Grid>
+
+                <Typography variant="h5" align="center">
+                  Probabilities
+                </Typography>
+                <Grid container justifyContent="space-around">
+                  <Box
+                    paddingX={isSmallScreen ? 2 : 5}
+                    style={{ flexGrow: 1, marginLeft: 5 }}
+                  >
+                    <Chart data={chartData} rotated>
+                      <Animation />
+                      <ValueScale
+                        name="probability"
+                        modifyDomain={adjustDomain}
+                      />
+                      <ArgumentAxis />
+                      <ValueAxis
+                        scaleName="probability"
+                        labelComponent={ValueAxisPercentLabel}
+                      />
+                      <Stack
+                        stacks={[{ series: ["insignificant", "significant"] }]}
+                      />
+                      <BarSeries
+                        valueField="percent"
+                        argumentField="displayName"
+                        scaleName="probability"
+                        pointComponent={BarSeriesColorCodedPoint(chartData)}
+                      />
+                    </Chart>
+                  </Box>
+                </Grid>
+              </Box>
+            </Paper>{" "}
+          </Box>
         </Container>
         <Copyright />
       </div>

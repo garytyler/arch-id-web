@@ -1,5 +1,4 @@
 import {
-  ArgumentAxis,
   BarSeries,
   Chart,
   Legend,
@@ -97,19 +96,14 @@ export const LegendPercentLabel = (data: IChartDataPoint[]) => {
   };
 };
 
-export const ArgumentAxisLinkLabel =
-  (data: IChartDataPoint[]) => (props: ArgumentAxis.LabelProps) => {
-    return <ArgumentAxis.Label {...props} text={props.text} />;
-  };
-
 export const ValueAxisPercentLabel = (props: ValueAxis.LabelProps) => {
-  if (Number(props.text) % 1 !== 0) {
+  if (Number(props.text) % 1 === 0) {
+    return (
+      <ValueAxis.Label {...props} text={Number(props.text).toString() + "%"} />
+    );
+  } else {
     return null;
   }
-
-  return (
-    <ValueAxis.Label {...props} text={Number(props.text).toString() + "%"} />
-  );
 };
 
 export const PieSeriesLabeledPoint = (data: IChartDataPoint[]) => {
