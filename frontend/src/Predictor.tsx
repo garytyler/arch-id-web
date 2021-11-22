@@ -270,29 +270,15 @@ export default function Predictor() {
     return (
       <div>
         <Container className={classes.container}>
-          <Box
-            style={{ margin: "auto" }}
-            textAlign="center"
-            // minWidth={200}
-            maxWidth={320}
-          >
-            <Paper elevation={5}>
-              <Box className={classes.innerBox} textAlign="center">
-                {input()}
-                <Box
-                  marginTop={2}
-                  marginBottom={2}
-                  marginLeft={4}
-                  marginRight={4}
-                >
-                  <Typography>
-                    Submit an image of a structure to identify it's
-                    architectural style.
-                  </Typography>
-                </Box>
-              </Box>{" "}
-            </Paper>
-          </Box>
+          <Box className={classes.innerBox} textAlign="center">
+            {input()}
+            <Box marginTop={2} marginBottom={2} marginLeft={4} marginRight={4}>
+              <Typography>
+                Submit an image of a structure to identify it's architectural
+                style.
+              </Typography>
+            </Box>
+          </Box>{" "}
         </Container>
         <Box className={classes.stickToBottom}>
           <Copyright />
@@ -303,20 +289,11 @@ export default function Predictor() {
     return (
       <div>
         <Container className={classes.container}>
-          <Box style={{ margin: "auto" }} textAlign="center" maxWidth={320}>
-            <Paper elevation={5}>
-              <Box className={classes.innerBox} textAlign="center">
-                {input()}
-                <Box
-                  marginTop={2}
-                  marginBottom={2}
-                  marginLeft={4}
-                  marginRight={4}
-                >
-                  <CircularProgress color="secondary" />
-                </Box>
-              </Box>
-            </Paper>
+          <Box className={classes.innerBox} textAlign="center">
+            {input()}
+            <Box marginTop={2} marginBottom={2} marginLeft={4} marginRight={4}>
+              <CircularProgress color="secondary" />
+            </Box>
           </Box>
         </Container>
         <Box className={classes.stickToBottom}>
