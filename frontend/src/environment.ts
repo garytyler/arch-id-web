@@ -17,4 +17,4 @@ export const PROJECT_GITHUB_URL = "https://github.com/garytyler/arch-id-web";
 export const AUTHOR_NAME = "Gary Tyler";
 export const AUTHOR_URL = "https://github.com/garytyler";
 export const TENSORBOARD_URL =
-  "https://tensorboard.dev/experiment/4z5wnrlhRXCDTOWafbV1lw/#scalars";
+  "https://tensorboard.dev/experiment/SZGykuP6Q3a34MJW0ngmAg/#scalars";
