@@ -11,3 +11,5 @@
 !/config/models.prod.config
 !/scripts/
 !/scripts/deploy.sh
+!/LICENSE.md
+!/README.md
